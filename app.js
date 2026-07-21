@@ -5,69 +5,68 @@
   const PROFILE_KEY = "semaine.profile.v1";
   const ENVIES_KEY = "semaine.envies.v1";
   const SYNC_KEY = "semaine.sync.v1";
-  const COLORS = ["#374785", "#F76C6C", "#F8E9A1", "#A8D0E6"];
+  const COLORS = ["#7BC043", "#D9B44A", "#D98E6B", "#8AA0B4"];
 
-  // ---------- Avatar ----------
+  // ---------- Avatars (2 personnages fixes) ----------
 
-  const SKINS = ["#5C3A2E", "#8D5524", "#C68642", "#E8B98A", "#F6D7B0"];
-  const HAIR_COLORS = ["#EDE3B4", "#2A2A2A", "#6B4423", "#A5462C", "#F567C8"];
-  const HAIR_STYLES = [["long", "Longs"], ["short", "Courts"], ["bun", "Chignon"], ["curly", "Bouclés"], ["none", "Rasé"]];
-  const HAT_COLORS = ["none", "#F567C8", "#F76C6C", "#374785", "#F8E9A1"];
-  const TOP_COLORS = ["#F79256", "#F567C8", "#374785", "#4C9A6E", "#A89BE0"];
-  const BG_COLORS = ["#4A7C59", "#B9AEE8", "#A8D0E6", "#F5A9A0", "#F2D06B"];
+  const AVATAR_IDS = ["jill", "lui"];
 
-  const DEFAULT_AVATAR = {
-    skin: SKINS[0],
-    hairStyle: "long",
-    hairColor: HAIR_COLORS[0],
-    hat: HAT_COLORS[1],
-    top: TOP_COLORS[0],
-    bg: BG_COLORS[0],
+  const AVATAR_SVGS = {
+    jill: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" rx="22" fill="#7BC043"/>
+      <path d="M50,13 C29,13 19.5,30 21,48 C22,64 16,82 22,100 L78,100 C84,82 78,64 79,48 C80.5,30 71,13 50,13 Z" fill="#53351F"/>
+      <rect x="44.5" y="62" width="11" height="15" rx="5" fill="#E3A16C"/>
+      <path d="M25,100 C25,86 36,79 50,79 C64,79 75,86 75,100 Z" fill="#F2ECDC"/>
+      <path d="M21,46 C18,66 19,84 26,100 L36,100 C31,84 29.5,62 32,48 Z" fill="#53351F"/>
+      <path d="M79,46 C82,66 81,84 74,100 L64,100 C69,84 70.5,62 68,48 Z" fill="#53351F"/>
+      <ellipse cx="50" cy="49" rx="20.5" ry="22.5" fill="#EFB584"/>
+      <path d="M29.5,50 C27,27 38,19.5 50,19.5 C62,19.5 73,27 70.5,50 C68.5,35.5 63,31 58.5,30.5 C54,30 52,33.5 50,33.5 C48,33.5 46,30 41.5,30.5 C37,31 31.5,35.5 29.5,50 Z" fill="#53351F"/>
+      <circle cx="42" cy="50.5" r="4.9" fill="#33241A"/>
+      <circle cx="58" cy="50.5" r="4.9" fill="#33241A"/>
+      <circle cx="43.6" cy="49" r="1.7" fill="#fff"/>
+      <circle cx="59.6" cy="49" r="1.7" fill="#fff"/>
+      <path d="M36.5,42.5 Q41,40.5 45.5,42.3" fill="none" stroke="#3E2B1D" stroke-width="2.1" stroke-linecap="round"/>
+      <path d="M54.5,42.3 Q59,40.5 63.5,42.5" fill="none" stroke="#3E2B1D" stroke-width="2.1" stroke-linecap="round"/>
+      <path d="M50,55 Q48.6,57.8 50.4,58.6" fill="none" stroke="#D9955F" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M45.5,63 Q50,66 54.5,63" fill="none" stroke="#B96A4B" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="34.5" cy="57.5" rx="3.2" ry="1.9" fill="#F0985F" opacity="0.5"/>
+      <ellipse cx="65.5" cy="57.5" rx="3.2" ry="1.9" fill="#F0985F" opacity="0.5"/>
+    </svg>`,
+    lui: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" rx="22" fill="#7BC043"/>
+      <rect x="44.5" y="64" width="11" height="15" rx="5" fill="#DD9C60"/>
+      <path d="M25,100 C25,86 36,79 50,79 C64,79 75,86 75,100 Z" fill="#F2ECDC"/>
+      <ellipse cx="50" cy="51" rx="20.5" ry="22.5" fill="#E8A96E"/>
+      <g fill="#4A2E17">
+        <circle cx="32" cy="37" r="9"/>
+        <circle cx="38" cy="28" r="9"/>
+        <circle cx="47" cy="23.5" r="9.5"/>
+        <circle cx="57" cy="24.5" r="9"/>
+        <circle cx="65" cy="29.5" r="9"/>
+        <circle cx="70.5" cy="38" r="8.5"/>
+        <circle cx="28.5" cy="46" r="6.5"/>
+        <circle cx="72.5" cy="47" r="6.5"/>
+        <rect x="28" y="30" width="44" height="15"/>
+        <circle cx="35.5" cy="42.5" r="6.8"/>
+        <circle cx="46" cy="39.5" r="7.8"/>
+        <circle cx="58" cy="40" r="7.3"/>
+        <circle cx="67" cy="44" r="5.8"/>
+      </g>
+      <circle cx="42" cy="53" r="4.9" fill="#33241A"/>
+      <circle cx="58" cy="53" r="4.9" fill="#33241A"/>
+      <circle cx="43.6" cy="51.5" r="1.7" fill="#fff"/>
+      <circle cx="59.6" cy="51.5" r="1.7" fill="#fff"/>
+      <path d="M36,45.5 Q41,43.3 45.8,45.2" fill="none" stroke="#33200F" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M54.2,45.2 Q59,43.3 64,45.5" fill="none" stroke="#33200F" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M50,57.5 Q48.6,60.2 50.4,61" fill="none" stroke="#C98A50" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M43,64.6 Q46.5,62 50,64.2 Q53.5,62 57,64.6 Q53.5,66.6 50,65.8 Q46.5,66.6 43,64.6 Z" fill="#432B18"/>
+      <path d="M46.5,67.5 Q50,70 53.5,67.5" fill="none" stroke="#A5643C" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M46.8,71.5 Q50,76 53.2,71.5 Q51.8,74.8 50,74.8 Q48.2,74.8 46.8,71.5 Z" fill="#432B18"/>
+    </svg>`,
   };
 
-  function avatarSVG(c) {
-    const S = 'stroke="#1F1B16" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"';
-    let hairBack = "";
-    let hairFront = "";
-
-    if (c.hairStyle === "long") {
-      hairBack = `<path d="M22,98 C13,64 18,42 30,30 L70,30 C82,42 87,64 78,98
-        C72,80 74,66 70,58 C66,74 60,72 62,88 C50,80 50,80 38,88 C40,72 34,74 30,58 C26,66 28,80 22,98 Z"
-        fill="${c.hairColor}" ${S}/>`;
-    }
-
-    if (c.hat === "none" && c.hairStyle !== "none") {
-      if (c.hairStyle === "short" || c.hairStyle === "long") {
-        hairFront = `<path d="M32.5,34 C32,18 42,13.5 50,13.5 C58,13.5 68,18 67.5,34 C61,25.5 39,25.5 32.5,34 Z" fill="${c.hairColor}" ${S}/>`;
-      } else if (c.hairStyle === "bun") {
-        hairFront = `<circle cx="50" cy="12.5" r="6.8" fill="${c.hairColor}" ${S}/>
-          <path d="M32.5,34 C32,18 42,13.5 50,13.5 C58,13.5 68,18 67.5,34 C61,25.5 39,25.5 32.5,34 Z" fill="${c.hairColor}" ${S}/>`;
-      } else if (c.hairStyle === "curly") {
-        hairFront = `<path d="M31.5,31 Q26.5,17 39,13.5 Q43,5.5 53,8.5 Q63.5,6 65.5,16 Q72.5,20 68.5,31 Q50,22 31.5,31 Z" fill="${c.hairColor}" ${S}/>`;
-      }
-    }
-
-    const hat = c.hat === "none" ? "" : `
-      <path d="M31,28.5 C31,13 41,7.5 50,7.5 C59,7.5 69,13 69,28.5 Z" fill="${c.hat}" ${S}/>
-      <path d="M40,10.5 L40,25 M50,8.5 L50,25 M60,10.5 L60,25" fill="none" stroke="#1F1B16" stroke-width="1" opacity="0.35"/>
-      <rect x="29.5" y="24.5" width="41" height="8" rx="4" fill="${c.hat}" ${S}/>`;
-
-    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100" height="100" fill="${c.bg}"/>
-      ${hairBack}
-      <rect x="43.5" y="48" width="13" height="20" rx="5.5" fill="${c.skin}" ${S}/>
-      <path d="M17,102 L17,89 C17,77 30,70.5 50,70.5 C70,70.5 83,77 83,89 L83,102 Z" fill="${c.top}" ${S}/>
-      <path d="M38,74 L34,102 M62,74 L66,102" fill="none" stroke="#1F1B16" stroke-width="1" opacity="0.25"/>
-      <ellipse cx="50" cy="38" rx="17.5" ry="19.5" fill="${c.skin}" ${S}/>
-      <ellipse cx="43.5" cy="37.5" rx="2.1" ry="3" fill="#1F1B16"/>
-      <ellipse cx="56.5" cy="37.5" rx="2.1" ry="3" fill="#1F1B16"/>
-      <path d="M39.5,30.5 Q43.5,28.5 47,30.3 M53,30.3 Q56.5,28.5 60.5,30.5" fill="none" stroke="#1F1B16" stroke-width="1.5" stroke-linecap="round"/>
-      <path d="M50,40 Q48.4,42.6 50.4,43.4" fill="none" stroke="#1F1B16" stroke-width="1.3" stroke-linecap="round"/>
-      <path d="M44.5,47 Q50,49.5 55.5,47 Q53.5,53.5 50,53.5 Q46.5,53.5 44.5,47 Z" fill="#1F1B16"/>
-      <path d="M46.5,51.5 Q50,53.8 53.5,51.5 Q52,53.5 50,53.5 Q48,53.5 46.5,51.5 Z" fill="#F567C8"/>
-      ${hairFront}
-      ${hat}
-    </svg>`;
+  function avatarSVG(id) {
+    return AVATAR_SVGS[id] || AVATAR_SVGS.jill;
   }
 
   // ---------- State ----------
@@ -80,7 +79,7 @@
   let view = "week";
   let profile = loadProfile();
   let envies = loadEnvies();
-  let avatarCfg = { ...DEFAULT_AVATAR };
+  let obAvatar = "jill";
   let pendingEnvieId = null;
   let syncSpace = loadSync();
   let lastSyncAt = null;
@@ -104,7 +103,7 @@
     try {
       const p = JSON.parse(localStorage.getItem(PROFILE_KEY));
       if (!p || !p.name) return null;
-      if (typeof p.avatar !== "object" || !p.avatar) p.avatar = { ...DEFAULT_AVATAR };
+      if (!AVATAR_IDS.includes(p.avatar)) p.avatar = "jill";
       return p;
     } catch {
       return null;
@@ -203,7 +202,7 @@
   // ---------- Rendering ----------
 
   function render() {
-    for (const v of ["week", "upcoming", "envies"]) {
+    for (const v of ["week", "upcoming", "envies", "profile"]) {
       $(v + "View").hidden = view !== v;
     }
     if (render.lastView !== view) {
@@ -214,10 +213,12 @@
       render.lastView = view;
       window.scrollTo({ top: 0 });
     }
-    if (view !== "week") $("topBar").textContent = view === "envies" ? "Envies" : "À venir";
+    const titles = { envies: "Envies", upcoming: "À venir", profile: "Profil" };
+    if (view !== "week") $("topBar").textContent = titles[view];
     $("navWeek").classList.toggle("active", view === "week");
     $("navUpcoming").classList.toggle("active", view === "upcoming");
     $("navEnvies").classList.toggle("active", view === "envies");
+    $("navProfile").classList.toggle("active", view === "profile");
 
     if (view === "upcoming") {
       renderUpcoming();
@@ -225,6 +226,10 @@
     }
     if (view === "envies") {
       renderEnvies();
+      return;
+    }
+    if (view === "profile") {
+      renderProfile();
       return;
     }
 
@@ -341,70 +346,30 @@
 
   // ---------- Onboarding ----------
 
-  const BUILDER_ROWS = [
-    { key: "skin", label: "Peau", colors: SKINS },
-    { key: "hairStyle", label: "Cheveux", chips: HAIR_STYLES },
-    { key: "hairColor", label: "Couleur des cheveux", colors: HAIR_COLORS },
-    { key: "hat", label: "Bonnet", colors: HAT_COLORS },
-    { key: "top", label: "Haut", colors: TOP_COLORS },
-    { key: "bg", label: "Fond", colors: BG_COLORS },
-  ];
-
-  function renderBuilder() {
-    $("obAvatar").innerHTML = avatarSVG(avatarCfg);
-    const root = $("builder");
+  function renderAvatarChoice() {
+    const root = $("avatarChoice");
     root.innerHTML = "";
-    for (const row of BUILDER_ROWS) {
-      const label = document.createElement("p");
-      label.className = "builder-label";
-      label.textContent = row.label;
-      root.appendChild(label);
-
-      const wrap = document.createElement("div");
-      wrap.className = "builder-row";
-
-      if (row.colors) {
-        for (const color of row.colors) {
-          const dot = document.createElement("button");
-          dot.type = "button";
-          dot.className = "swatch";
-          if (color === "none") dot.classList.add("swatch-none");
-          else dot.style.background = color;
-          if (avatarCfg[row.key] === color) dot.classList.add("selected");
-          dot.addEventListener("click", () => {
-            avatarCfg[row.key] = color;
-            renderBuilder();
-          });
-          wrap.appendChild(dot);
-        }
-      } else {
-        for (const [value, text] of row.chips) {
-          const chip = document.createElement("button");
-          chip.type = "button";
-          chip.className = "chip";
-          chip.textContent = text;
-          if (avatarCfg[row.key] === value) chip.classList.add("selected");
-          chip.addEventListener("click", () => {
-            avatarCfg[row.key] = value;
-            renderBuilder();
-          });
-          wrap.appendChild(chip);
-        }
-      }
-      root.appendChild(wrap);
+    for (const id of AVATAR_IDS) {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "avatar-card";
+      if (id === obAvatar) card.classList.add("selected");
+      card.innerHTML = `<span class="img">${avatarSVG(id)}</span><span class="who">${id === "jill" ? "Jill" : "Lui"}</span>`;
+      card.addEventListener("click", () => {
+        obAvatar = id;
+        renderAvatarChoice();
+      });
+      root.appendChild(card);
     }
   }
 
   function openOnboard(step) {
-    avatarCfg = profile ? { ...profile.avatar } : { ...DEFAULT_AVATAR };
+    obAvatar = profile ? profile.avatar : "jill";
     $("obName").value = profile ? profile.name : "";
-    $("obNext").textContent = profile ? "Continuer" : "Continuer";
     $("obDone").textContent = profile ? "Enregistrer" : "Commencer";
     $("obStep1").hidden = step === 2;
     $("obStep2").hidden = step !== 2;
-    $("obInvite").hidden = !profile;
-    if (profile) refreshNotifBtn();
-    if (step === 2) renderBuilder();
+    if (step === 2) renderAvatarChoice();
     const ob = $("onboard");
     ob.hidden = false;
     ob.classList.remove("hide");
@@ -418,7 +383,7 @@
     }
     $("obStep1").hidden = true;
     $("obStep2").hidden = false;
-    renderBuilder();
+    renderAvatarChoice();
   });
 
   $("obName").addEventListener("keydown", (e) => {
@@ -426,7 +391,7 @@
   });
 
   $("obDone").addEventListener("click", () => {
-    profile = { name: $("obName").value.trim(), avatar: { ...avatarCfg } };
+    profile = { name: $("obName").value.trim(), avatar: obAvatar };
     saveProfile();
     const ob = $("onboard");
     ob.classList.add("hide");
@@ -434,18 +399,51 @@
     render();
   });
 
-  $("profileBtn").addEventListener("click", () => openOnboard(1));
+  $("profileBtn").addEventListener("click", () => {
+    view = "profile";
+    render();
+  });
+
+  $("editProfileBtn").addEventListener("click", () => openOnboard(1));
+
+  // ---------- Profil ----------
+
+  function renderProfile() {
+    if (!profile) return;
+    $("profileAvatar").innerHTML = avatarSVG(profile.avatar);
+    $("profileName").textContent = profile.name;
+
+    const todayKey = toKey(new Date());
+    const lp = livePlans();
+    const stats = [
+      [lp.filter((p) => p.by && p.by.n === profile.name).length, "Proposés par toi"],
+      [lp.length, "Plans ensemble"],
+      [lp.filter((p) => p.date < todayKey).length, "Déjà vécus"],
+      [liveEnvies().length, "Envies en attente"],
+    ];
+    const grid = $("statsGrid");
+    grid.innerHTML = "";
+    stats.forEach(([n, label], i) => {
+      const el = document.createElement("div");
+      el.className = "stat-card";
+      el.style.setProperty("--i", i);
+      el.innerHTML = '<div class="num"></div><div class="lbl"></div>';
+      el.querySelector(".num").textContent = n;
+      el.querySelector(".lbl").textContent = label;
+      grid.appendChild(el);
+    });
+    refreshNotifBtn();
+  }
 
   function refreshNotifBtn() {
-    const btn = $("notifBtn");
+    const hint = $("notifHint");
     if (!("Notification" in window)) {
-      btn.textContent = "Notifications non disponibles ici";
-      btn.disabled = true;
+      hint.textContent = "Indisponible";
       return;
     }
-    if (Notification.permission === "granted") btn.textContent = "Notifications activées ✓";
-    else if (Notification.permission === "denied") btn.textContent = "Notifications refusées (voir Réglages)";
-    else btn.textContent = "Activer les notifications";
+    if (Notification.permission === "granted") hint.textContent = "Activées ✓";
+    else if (Notification.permission === "denied") hint.textContent = "Refusées";
+    else hint.textContent = "Activer";
   }
 
   $("notifBtn").addEventListener("click", async () => {
@@ -901,6 +899,11 @@
 
   $("navEnvies").addEventListener("click", () => {
     view = "envies";
+    render();
+  });
+
+  $("navProfile").addEventListener("click", () => {
+    view = "profile";
     render();
   });
 
