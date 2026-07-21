@@ -70,6 +70,64 @@ button {
   padding: calc(env(safe-area-inset-top) + 34px) 24px calc(env(safe-area-inset-bottom) + 108px);
 }
 
+/* ---------- Splash (animation d'ouverture) ---------- */
+
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--bg);
+  display: grid;
+  place-items: center;
+  transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+}
+
+.splash.hide {
+  opacity: 0;
+  transform: scale(1.04);
+  pointer-events: none;
+}
+
+.splash-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.splash-mark {
+  width: 76px;
+  height: 76px;
+  border-radius: 22px;
+  background: var(--accent);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 12px 34px rgba(106, 176, 60, 0.4);
+  animation: splashPop 0.65s var(--spring) both;
+}
+
+.splash-mark svg { width: 38px; height: 38px; }
+
+.splash-word {
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  animation: splashWord 0.5s var(--ease-out) 0.18s both;
+}
+
+@keyframes splashPop {
+  0% { opacity: 0; transform: scale(0.55); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes splashWord {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* ---------- Compact top bar ---------- */
 
 .top-bar {

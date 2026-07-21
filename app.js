@@ -966,6 +966,19 @@
     render();
   });
 
+  // ---------- Splash (animation d'ouverture) ----------
+
+  (function initSplash() {
+    const splash = $("splash");
+    if (!splash) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const hold = reduce ? 250 : 900;
+    setTimeout(() => {
+      splash.classList.add("hide");
+      setTimeout(() => splash.remove(), 550);
+    }, hold);
+  })();
+
   // ---------- PWA ----------
 
   if ("serviceWorker" in navigator) {
