@@ -268,7 +268,13 @@
       return;
     }
 
-    items.forEach((item, i) => planList.appendChild(makeCard(item, i)));
+    const now = new Date();
+    const isToday = selectedDate === toKey(now);
+    const nowHM = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    const tl = document.createElement("div");
+    tl.className = "timeline";
+    items.forEach((item, i) => tl.appendChild(makeTimelineRow(item, i, isToday, nowHM)));
+    planList.appendChild(tl);
   }
 
   function miniAvatar(by) {
@@ -280,7 +286,7 @@
     return el;
   }
 
-  function makeCard(item, i) {
+  function makeCard(item, i, hideTime) {
     const card = document.createElement("button");
     card.className = "plan-card";
     card.type = "button";
@@ -288,7 +294,7 @@
     card.style.setProperty("--i", i);
     const time = item.end ? `${item.start} – ${item.end}` : item.start;
     card.innerHTML = `
-      <div class="meta"><span class="cdot"></span><span class="time">${time}</span></div>
+      ${hideTime ? "" : `<div class="meta"><span class="cdot"></span><span class="time">${time}</span></div>`}
       <div class="title"></div>
       ${item.note ? '<div class="note"></div>' : ""}`;
     card.querySelector(".title").textContent = item.title;
@@ -297,6 +303,105 @@
     if (avatar) card.appendChild(avatar);
     card.addEventListener("click", () => openSheet(item));
     return card;
+  }
+
+  const TRASH_SVG =
+    '<svg viewBox="0 0 24 24"><path d="M6 7h12M9.5 7V5.5A1.5 1.5 0 0 1 11 4h2a1.5 1.5 0 0 1 1.5 1.5V7M7 7l.7 11a1.5 1.5 0 0 0 1.5 1.4h5.6a1.5 1.5 0 0 0 1.5-1.4L18 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function makeTimelineRow(item, i, isToday, nowHM) {
+    const row = document.createElement("div");
+    row.className = "tl-row";
+    row.style.setProperty("--i", i);
+    row.style.setProperty("--plan-color", item.color);
+    if (isToday && (item.end || item.start) < nowHM) row.classList.add("past");
+
+    const time = document.createElement("span");
+    time.className = "tl-time";
+    time.innerHTML = `<span class="t0">${item.start}</span>${item.end ? `<span class="t1">${item.end}</span>` : ""}`;
+
+    const dot = document.createElement("span");
+    dot.className = "tl-dot";
+
+    const swipe = document.createElement("div");
+    swipe.className = "swipe";
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "swipe-del";
+    del.setAttribute("aria-label", "Supprimer");
+    del.innerHTML = TRASH_SVG;
+    const card = makeCard(item, i, true);
+    swipe.append(del, card);
+    del.addEventListener("click", () => deletePlan(item.id));
+    attachSwipe(swipe, card);
+
+    row.append(time, dot, swipe);
+    return row;
+  }
+
+  // Glisser vers la gauche pour révéler "Supprimer" (comme Mail iOS).
+  function attachSwipe(swipe, card) {
+    const W = 78;
+    let x0 = null, y0 = null, dx = 0, dragging = false, opened = false, moved = false;
+    const setX = (v) => { card.style.transform = v ? `translateX(${v}px)` : ""; };
+
+    card.addEventListener("touchstart", (e) => {
+      x0 = e.touches[0].clientX;
+      y0 = e.touches[0].clientY;
+      moved = false;
+      dragging = false;
+    }, { passive: true });
+
+    card.addEventListener("touchmove", (e) => {
+      if (x0 === null) return;
+      const ddx = e.touches[0].clientX - x0;
+      const ddy = e.touches[0].clientY - y0;
+      if (!dragging) {
+        if (Math.abs(ddx) > 8 && Math.abs(ddx) > Math.abs(ddy)) {
+          dragging = true;
+          swipe.classList.add("dragging");
+        } else if (Math.abs(ddy) > 8) {
+          x0 = null;
+          return;
+        } else return;
+      }
+      moved = true;
+      dx = Math.max(-W - 16, Math.min(0, (opened ? -W : 0) + ddx));
+      setX(dx);
+    }, { passive: true });
+
+    card.addEventListener("touchend", () => {
+      if (x0 === null) return;
+      x0 = null;
+      swipe.classList.remove("dragging");
+      if (!moved) return;
+      opened = dx < -W / 2;
+      setX(opened ? -W : 0);
+    });
+
+    // Un glissement ne doit pas ouvrir la fiche ; un tap sur une carte ouverte la referme.
+    card.addEventListener("click", (e) => {
+      if (moved) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        moved = false;
+      } else if (opened) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        opened = false;
+        setX(0);
+      }
+    }, true);
+  }
+
+  function deletePlan(id) {
+    const plan = plans.find((p) => p.id === id);
+    if (plan) {
+      plan.del = 1;
+      plan.u = Date.now();
+    }
+    save();
+    render();
+    toast("Plan supprimé");
   }
 
   function renderGreeting() {
