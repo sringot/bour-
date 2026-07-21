@@ -203,13 +203,12 @@
   // ---------- Rendering ----------
 
   function render() {
-    for (const v of ["week", "upcoming", "envies", "duo"]) {
+    for (const v of ["week", "upcoming", "envies"]) {
       $(v + "View").hidden = view !== v;
     }
     $("navWeek").classList.toggle("active", view === "week");
     $("navUpcoming").classList.toggle("active", view === "upcoming");
     $("navEnvies").classList.toggle("active", view === "envies");
-    $("navDuo").classList.toggle("active", view === "duo");
 
     if (view === "upcoming") {
       renderUpcoming();
@@ -217,10 +216,6 @@
     }
     if (view === "envies") {
       renderEnvies();
-      return;
-    }
-    if (view === "duo") {
-      renderDuo();
       return;
     }
 
@@ -381,6 +376,7 @@
     $("obDone").textContent = profile ? "Enregistrer" : "Commencer";
     $("obStep1").hidden = step === 2;
     $("obStep2").hidden = step !== 2;
+    $("obInvite").hidden = !profile;
     if (step === 2) renderBuilder();
     const ob = $("onboard");
     ob.hidden = false;
@@ -494,23 +490,16 @@
     else localStorage.removeItem(SYNC_KEY);
   }
 
-  function setDuoStatus(msg) {
-    $("duoStatus").textContent = msg;
-    clearTimeout(setDuoStatus.t);
-    setDuoStatus.t = setTimeout(() => { $("duoStatus").textContent = ""; }, 5000);
-  }
-
-  function renderDuo() {
-    $("duoUnpaired").hidden = !!syncSpace;
-    $("duoPaired").hidden = !syncSpace;
-    if (!syncSpace) return;
-    $("duoCode").textContent = syncSpace.id;
-    if (!lastSyncAt) {
-      $("syncInfo").textContent = "Espace créé. Partage le code avec l'autre téléphone.";
-    } else {
-      const mins = Math.round((Date.now() - lastSyncAt) / 60000);
-      $("syncInfo").textContent = mins < 1 ? "Synchronisé à l'instant ✓" : `Synchronisé il y a ${mins} min ✓`;
-    }
+  function toast(msg) {
+    const el = $("toast");
+    el.textContent = msg;
+    el.hidden = false;
+    requestAnimationFrame(() => el.classList.add("visible"));
+    clearTimeout(toast.t);
+    toast.t = setTimeout(() => {
+      el.classList.remove("visible");
+      setTimeout(() => { el.hidden = true; }, 350);
+    }, 3500);
   }
 
   function mergeLists(local, incoming) {
@@ -555,9 +544,8 @@
         persist();
         render();
       }
-      renderDuo();
     } catch {
-      if (view === "duo") setDuoStatus("Hors ligne · réessaiera automatiquement");
+      /* hors ligne : nouvelle tentative au prochain déclencheur */
     } finally {
       syncing = false;
     }
@@ -569,83 +557,71 @@
     scheduleSync.t = setTimeout(syncNow, 1500);
   }
 
-  $("createSpaceBtn").addEventListener("click", async () => {
-    setDuoStatus("Création de l'espace…");
-    try {
-      const res = await fetch(API_BASE, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ v: 1, p: plans, e: envies }),
-      });
-      const loc = res.headers.get("Location") || "";
-      const id = loc.split("/").filter(Boolean).pop();
-      if (!res.ok || !id) throw new Error();
-      syncSpace = { id };
-      saveSync();
-      lastSyncAt = Date.now();
-      renderDuo();
-      setDuoStatus("Espace créé ✓");
-    } catch {
-      setDuoStatus("Impossible de créer l'espace · vérifie ta connexion");
-    }
-  });
+  async function ensureSpace() {
+    if (syncSpace) return syncSpace.id;
+    const res = await fetch(API_BASE, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ v: 1, p: plans, e: envies }),
+    });
+    const loc = res.headers.get("Location") || "";
+    const id = loc.split("/").filter(Boolean).pop();
+    if (!res.ok || !id) throw new Error();
+    syncSpace = { id };
+    saveSync();
+    lastSyncAt = Date.now();
+    return id;
+  }
 
-  $("joinBtn").addEventListener("click", async () => {
-    const id = $("joinInput").value.trim().split("/").filter(Boolean).pop();
-    if (!id) return;
-    setDuoStatus("Connexion…");
-    try {
-      const res = await fetch(`${API_BASE}/${id}`, { cache: "no-store" });
-      if (!res.ok) throw new Error();
-      const remote = await res.json();
-      if (!remote || remote.v !== 1) throw new Error();
-      syncSpace = { id };
-      saveSync();
-      [plans] = mergeLists(plans, remote.p);
-      [envies] = mergeLists(envies, remote.e);
-      persist();
-      await fetch(`${API_BASE}/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ v: 1, p: plans, e: envies }),
-      });
-      lastSyncAt = Date.now();
-      $("joinInput").value = "";
-      renderDuo();
-      render();
-      setDuoStatus("Espace rejoint ✓");
-    } catch {
-      syncSpace = null;
-      saveSync();
-      setDuoStatus("Code introuvable · vérifie-le");
-    }
-  });
+  async function joinSpace(id) {
+    const res = await fetch(`${API_BASE}/${id}`, { cache: "no-store" });
+    if (!res.ok) throw new Error();
+    const remote = await res.json();
+    if (!remote || remote.v !== 1) throw new Error();
+    syncSpace = { id };
+    saveSync();
+    [plans] = mergeLists(plans, remote.p);
+    [envies] = mergeLists(envies, remote.e);
+    persist();
+    await fetch(`${API_BASE}/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ v: 1, p: plans, e: envies }),
+    });
+    lastSyncAt = Date.now();
+    render();
+  }
 
-  $("shareCodeBtn").addEventListener("click", async () => {
-    const text = `Notre code Semaine : ${syncSpace.id}\nDans l'app : À deux → Rejoindre avec un code`;
+  $("inviteBtn").addEventListener("click", async () => {
     try {
+      const id = await ensureSpace();
+      const url = `${location.origin}${location.pathname}#s=${id}`;
+      const text = `Rejoins-moi sur Semaine : ouvre ce lien puis ajoute l'app à ton écran d'accueil.\n${url}`;
       if (navigator.share) await navigator.share({ text });
       else {
-        await navigator.clipboard.writeText(syncSpace.id);
-        setDuoStatus("Code copié ✓");
+        await navigator.clipboard.writeText(text);
+        toast("Lien d'invitation copié ✓");
       }
-    } catch {
-      /* partage annulé */
+    } catch (err) {
+      if (err && err.name === "AbortError") return;
+      toast("Impossible pour l'instant · vérifie ta connexion");
     }
   });
 
-  $("syncNowBtn").addEventListener("click", async () => {
-    await syncNow();
-    if (lastSyncAt) setDuoStatus("Synchronisé ✓");
-  });
-
-  $("leaveBtn").addEventListener("click", () => {
-    syncSpace = null;
-    lastSyncAt = null;
-    saveSync();
-    renderDuo();
-    setDuoStatus("Espace quitté · tes données restent sur ce téléphone");
-  });
+  // Ouverture via un lien d'invitation : connexion silencieuse des deux téléphones
+  async function handleInviteLink() {
+    const match = location.hash.match(/s=([A-Za-z0-9]+)/);
+    if (!match) return;
+    const id = match[1];
+    history.replaceState(null, "", location.pathname);
+    if (syncSpace && syncSpace.id === id) return;
+    try {
+      await joinSpace(id);
+      toast("Téléphones connectés ✓ La synchronisation est automatique.");
+    } catch {
+      toast("Connexion impossible · réouvre le lien d'invitation");
+    }
+  }
 
   setInterval(() => {
     if (syncSpace && document.visibilityState === "visible") syncNow();
@@ -808,10 +784,6 @@
     render();
   });
 
-  $("navDuo").addEventListener("click", () => {
-    view = "duo";
-    render();
-  });
 
   $("prevWeek").addEventListener("click", () => shiftWeek(-7));
   $("nextWeek").addEventListener("click", () => shiftWeek(7));
@@ -836,5 +808,7 @@
 
   render();
   if (!profile) openOnboard(1);
-  if (syncSpace) syncNow();
+  handleInviteLink().then(() => {
+    if (syncSpace) syncNow();
+  });
 })();

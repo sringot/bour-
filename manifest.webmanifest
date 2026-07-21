@@ -2,7 +2,6 @@
   "name": "Semaine",
   "short_name": "Semaine",
   "description": "Planning de la semaine",
-  "start_url": ".",
   "display": "standalone",
   "background_color": "#E4EEF6",
   "theme_color": "#E4EEF6",

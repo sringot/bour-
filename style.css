@@ -98,6 +98,8 @@ body {
 
 .onboard.hide { opacity: 0; pointer-events: none; }
 
+.onboard[hidden] { display: none; }
+
 .onboard-inner {
   width: 100%;
   max-width: 320px;
@@ -802,58 +804,28 @@ label.field input:focus { outline: none; }
 
 .btn-secondary:active { box-shadow: var(--in); }
 
-.duo-label {
-  font-size: 11px;
+.toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  bottom: calc(env(safe-area-inset-bottom) + 96px);
+  max-width: calc(100% - 56px);
+  background: var(--ink);
+  color: #fff;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin: 22px 0 10px;
-  animation: rise 0.4s var(--ease) 100ms backwards;
-}
-
-.duo-code-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--inset-bg);
-  box-shadow: var(--in);
+  padding: 11px 18px;
   border-radius: 14px;
-  padding: 12px 12px 12px 16px;
-  margin-bottom: 14px;
-  animation: rise 0.4s var(--ease) 60ms backwards;
+  box-shadow: 0 8px 24px var(--sh-dark);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+  pointer-events: none;
+  z-index: 30;
 }
 
-.duo-code {
-  flex: 1;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  word-break: break-all;
-  user-select: all;
-  -webkit-user-select: all;
-}
-
-.duo-leave {
-  display: block;
-  margin: 18px auto 0;
-  border: none;
-  background: none;
-  color: var(--accent-warm);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  opacity: 0.85;
-}
-
-.duo-status {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--accent);
-  text-align: center;
-  margin-top: 14px;
-  min-height: 18px;
+.toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 /* ---------- Motion ---------- */

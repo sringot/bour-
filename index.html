@@ -73,36 +73,9 @@
       <section id="envieList" class="plan-list"></section>
     </div>
 
-    <div id="duoView" hidden>
-      <header class="header">
-        <h1 class="month">À deux</h1>
-      </header>
-
-      <div id="duoUnpaired">
-        <p class="view-sub">Un espace commun pour vos deux téléphones : plans et envies se synchronisent automatiquement.</p>
-        <button id="createSpaceBtn" class="btn btn-primary duo-btn">Créer notre espace</button>
-        <p class="duo-label">Ou rejoindre avec un code</p>
-        <input id="joinInput" class="field" type="text" placeholder="Code reçu" autocomplete="off">
-        <button id="joinBtn" class="btn btn-secondary duo-btn">Rejoindre</button>
-      </div>
-
-      <div id="duoPaired" hidden>
-        <p id="syncInfo" class="view-sub"></p>
-        <p class="duo-label">Code de l'espace</p>
-        <div class="duo-code-card">
-          <span id="duoCode" class="duo-code"></span>
-          <button id="shareCodeBtn" class="envie-action" aria-label="Partager le code">
-            <svg viewBox="0 0 24 24"><path d="M12 14.5V4M8.5 7 12 3.5 15.5 7M6 11.5H5.5A1.5 1.5 0 0 0 4 13v6a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19v-6a1.5 1.5 0 0 0-1.5-1.5H18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-        <button id="syncNowBtn" class="btn btn-secondary duo-btn">Synchroniser maintenant</button>
-        <button id="leaveBtn" class="duo-leave">Quitter l'espace</button>
-      </div>
-
-      <p id="duoStatus" class="duo-status"></p>
-    </div>
-
   </main>
+
+  <div id="toast" class="toast" hidden></div>
 
   <nav class="navbar" aria-label="Navigation">
     <button id="navWeek" class="nav-btn active" aria-label="Semaine">
@@ -116,9 +89,6 @@
     </button>
     <button id="navUpcoming" class="nav-btn" aria-label="À venir">
       <svg viewBox="0 0 24 24"><path d="M5 6.5h14M5 12h14M5 17.5h9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    </button>
-    <button id="navDuo" class="nav-btn" aria-label="À deux">
-      <svg viewBox="0 0 24 24"><circle cx="9.5" cy="12" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="15.5" cy="12" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
     </button>
   </nav>
 
@@ -138,6 +108,10 @@
       <div id="obAvatar" class="ob-avatar"></div>
       <h2 class="onboard-title">Ton avatar</h2>
       <div id="builder" class="builder"></div>
+      <div id="obInvite" hidden>
+        <p class="builder-label">Deuxième téléphone</p>
+        <button id="inviteBtn" class="btn btn-secondary duo-btn" type="button">Inviter l'autre téléphone</button>
+      </div>
       <button id="obDone" class="btn btn-primary onboard-btn">Commencer</button>
     </div>
 
