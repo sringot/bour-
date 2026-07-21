@@ -1,9 +1,10 @@
-const CACHE = "semaine-v14";
+const CACHE = "semaine-v15";
 const ASSETS = [
   ".",
   "index.html",
   "style.css",
   "app.js",
+  "firebase-config.js",
   "manifest.webmanifest",
   "icons/icon-180.png",
   "icons/icon-192.png",

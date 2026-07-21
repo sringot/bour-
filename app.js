@@ -573,6 +573,58 @@
 
   const API_BASE = localStorage.getItem("semaine.apiBase") || "https://jsonblob.com/api/jsonBlob";
 
+  // Backend Firebase (temps réel) si une config est fournie, sinon repli serverless.
+  const FB = (() => {
+    const cfg = window.FIREBASE_CONFIG;
+    if (!cfg || !cfg.projectId || typeof firebase === "undefined") return null;
+    try {
+      if (!firebase.apps.length) firebase.initializeApp(cfg);
+      return firebase.firestore();
+    } catch {
+      return null;
+    }
+  })();
+  const firebaseConfigured = !!(window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.projectId);
+  const useFirebase = !!FB;
+  // "fb" temps réel · "blob" repli serverless · "off" config présente mais SDK indisponible (hors ligne)
+  const syncMode = useFirebase ? "fb" : firebaseConfigured ? "off" : "blob";
+
+  function fbDoc(id) {
+    return FB.collection("spaces").doc(id);
+  }
+
+  let fbUnsub = null;
+  function startRealtime() {
+    if (!useFirebase || !syncSpace) return;
+    if (fbUnsub) fbUnsub();
+    fbUnsub = fbDoc(syncSpace.id).onSnapshot(
+      (snap) => {
+        if (!snap.exists) return;
+        const remote = snap.data() || {};
+        let c1, c2, f1, f2;
+        [plans, c1, f1] = mergeLists(plans, remote.p);
+        [envies, c2, f2] = mergeLists(envies, remote.e);
+        lastSyncAt = Date.now();
+        if (c1 || c2) {
+          persist();
+          render();
+          notifyFresh([...f1, ...f2]);
+        }
+      },
+      () => {}
+    );
+  }
+
+  async function pushFirebase() {
+    if (!useFirebase || !syncSpace) return;
+    try {
+      await fbDoc(syncSpace.id).set({ v: 1, p: plans, e: envies, t: Date.now() });
+      lastSyncAt = Date.now();
+    } catch {
+      /* réessai au prochain changement */
+    }
+  }
+
   function loadSync() {
     try {
       return JSON.parse(localStorage.getItem(SYNC_KEY));
@@ -691,13 +743,25 @@
   }
 
   function scheduleSync() {
-    if (!syncSpace) return;
+    if (!syncSpace || syncMode === "off") return;
     clearTimeout(scheduleSync.t);
-    scheduleSync.t = setTimeout(syncNow, 1500);
+    scheduleSync.t = setTimeout(useFirebase ? pushFirebase : syncNow, useFirebase ? 350 : 1500);
   }
 
   async function ensureSpace() {
     if (syncSpace) return syncSpace.id;
+    if (syncMode === "off") throw new Error("offline");
+
+    if (useFirebase) {
+      const id = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+      await fbDoc(id).set({ v: 1, p: plans, e: envies, t: Date.now() });
+      syncSpace = { id };
+      saveSync();
+      lastSyncAt = Date.now();
+      startRealtime();
+      return id;
+    }
+
     const res = await fetch(API_BASE, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -713,6 +777,23 @@
   }
 
   async function joinSpace(id) {
+    if (syncMode === "off") throw new Error("offline");
+
+    if (useFirebase) {
+      const snap = await fbDoc(id).get();
+      const remote = snap.exists ? snap.data() || {} : { v: 1, p: [], e: [] };
+      syncSpace = { id };
+      saveSync();
+      [plans] = mergeLists(plans, remote.p);
+      [envies] = mergeLists(envies, remote.e);
+      persist();
+      await fbDoc(id).set({ v: 1, p: plans, e: envies, t: Date.now() });
+      lastSyncAt = Date.now();
+      startRealtime();
+      render();
+      return;
+    }
+
     const res = await fetch(`${API_BASE}/${id}`, { cache: "no-store" });
     if (!res.ok) throw new Error();
     const remote = await res.json();
@@ -802,12 +883,15 @@
     if (dy > 110) closeSheet();
   });
 
+  // Le mode temps réel (Firebase) n'a pas besoin de sondage ; le repli serverless si.
   setInterval(() => {
-    if (syncSpace && document.visibilityState === "visible") syncNow();
+    if (syncMode === "blob" && syncSpace && document.visibilityState === "visible") syncNow();
   }, 30000);
 
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") syncNow();
+    if (document.visibilityState !== "visible") return;
+    if (syncMode === "blob") syncNow();
+    else if (useFirebase) pushFirebase();
   });
 
   function renderUpcoming() {
@@ -1010,6 +1094,8 @@
   render();
   if (!profile) openOnboard(1);
   handleInviteLink().then(() => {
-    if (syncSpace) syncNow();
+    if (!syncSpace) return;
+    if (useFirebase) startRealtime();
+    else if (syncMode === "blob") syncNow();
   });
 })();
