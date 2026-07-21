@@ -216,15 +216,28 @@
         <span class="dow">${fmtDow.format(day).replace(".", "")}</span>
         <span class="num">${day.getDate()}</span>
         <span class="dot"></span>`;
+      pill.dataset.key = key;
       pill.addEventListener("click", () => {
+        if (selectedDate === key) return;
         selectedDate = key;
-        render();
+        weekStrip.querySelectorAll(".day-pill").forEach((p) => {
+          p.classList.toggle("selected", p.dataset.key === key);
+        });
+        dayLabel.textContent = fmtFull.format(fromKey(key));
+        replay(dayLabel);
+        renderList();
       });
       weekStrip.appendChild(pill);
     }
 
     dayLabel.textContent = fmtFull.format(fromKey(selectedDate));
     renderList();
+  }
+
+  function replay(el) {
+    el.style.animation = "none";
+    void el.offsetWidth;
+    el.style.animation = "";
   }
 
   function renderList() {
@@ -315,7 +328,8 @@
       card.type = "button";
       card.className = "avatar-card";
       if (id === obAvatar.id) card.classList.add("selected");
-      card.innerHTML = `<span class="img">${avatarHTML({ id, bg: obAvatar.bg })}</span><span class="who">${id === "her" ? "Elle" : "Lui"}</span>`;
+      card.setAttribute("aria-label", id === "her" ? "Elle" : "Lui");
+      card.innerHTML = `<span class="img">${avatarHTML({ id, bg: obAvatar.bg })}</span>`;
       card.addEventListener("click", () => {
         obAvatar.id = id;
         renderAvatarChoice();
@@ -417,16 +431,35 @@
     ];
     const grid = $("statsGrid");
     grid.innerHTML = "";
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     stats.forEach(([n, label], i) => {
       const el = document.createElement("div");
       el.className = "stat-card";
       el.style.setProperty("--i", i);
       el.innerHTML = '<div class="num"></div><div class="lbl"></div>';
-      el.querySelector(".num").textContent = n;
       el.querySelector(".lbl").textContent = label;
+      const numEl = el.querySelector(".num");
+      if (reduceMotion || n === 0) {
+        numEl.textContent = n;
+      } else {
+        animateNum(numEl, n, 160 + i * 40);
+      }
       grid.appendChild(el);
     });
     refreshNotifBtn();
+  }
+
+  function animateNum(el, target, delay) {
+    el.textContent = "0";
+    const dur = 550;
+    let start = null;
+    const step = (t) => {
+      if (start === null) start = t + delay;
+      const p = Math.min(1, Math.max(0, (t - start) / dur));
+      el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   }
 
   function refreshNotifBtn() {
@@ -909,6 +942,9 @@
     weekStart = mondayOf(addDays(weekStart, days));
     selectedDate = toKey(weekStart);
     render();
+    weekStrip.classList.remove("slide-fwd", "slide-back");
+    void weekStrip.offsetWidth;
+    weekStrip.classList.add(days > 0 ? "slide-fwd" : "slide-back");
   }
 
   todayBtn.addEventListener("click", () => {

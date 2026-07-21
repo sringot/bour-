@@ -125,6 +125,7 @@ button {
   justify-content: space-between;
   gap: 14px;
   margin-bottom: 20px;
+  animation: cardIn 0.45s var(--spring) backwards;
 }
 
 .greet-hello {
@@ -238,6 +239,19 @@ button {
   touch-action: pan-y;
 }
 
+.week-strip.slide-fwd { animation: slideFwd 0.32s var(--ease-out); }
+.week-strip.slide-back { animation: slideBack 0.32s var(--ease-out); }
+
+@keyframes slideFwd {
+  from { opacity: 0.2; transform: translateX(18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideBack {
+  from { opacity: 0.2; transform: translateX(-18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 .day-pill {
   border: none;
   background: none;
@@ -285,6 +299,7 @@ button {
   background: var(--primary);
   color: var(--on-primary);
   font-weight: 600;
+  animation: pop 0.35s var(--spring);
 }
 
 .day-pill.today:not(.selected) .num {
@@ -301,6 +316,12 @@ button {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 8px;
+  animation: labelIn 0.3s var(--ease-out);
+}
+
+@keyframes labelIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ---------- Plan list ---------- */
@@ -459,6 +480,8 @@ button {
   background: var(--primary);
   color: var(--on-primary);
 }
+
+.nav-btn.active svg { animation: pop 0.4s var(--spring); }
 
 .nav-btn.active .nav-label {
   max-width: 72px;
@@ -741,39 +764,33 @@ label.field input:focus { outline: none; }
   border: none;
   background: var(--card);
   box-shadow: var(--card-shadow), 0 0 0 1.5px transparent;
-  border-radius: 20px;
-  padding: 14px 12px 12px;
+  border-radius: 22px;
+  padding: 13px;
   cursor: pointer;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  transition: transform 0.25s var(--spring), box-shadow 0.2s;
+  justify-content: center;
+  transition: transform 0.3s var(--spring), box-shadow 0.25s var(--ease-out);
 }
 
-.avatar-card:active { transform: scale(0.96); }
+.avatar-card:active { transform: scale(0.95); }
 
 .avatar-card.selected {
   box-shadow: var(--card-shadow), 0 0 0 1.5px var(--ink);
 }
 
 .avatar-card .img {
-  width: 88px;
-  height: 88px;
+  width: 92px;
+  height: 92px;
   border-radius: 18px;
   overflow: hidden;
 }
 
-.avatar-card .img svg { display: block; width: 100%; height: 100%; }
+.avatar-card.selected .img { animation: pop 0.4s var(--spring); }
 
-.avatar-card .who {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--secondary);
-  letter-spacing: -0.01em;
+@keyframes pop {
+  0% { transform: scale(0.94); }
+  100% { transform: scale(1); }
 }
-
-.avatar-card.selected .who { color: var(--ink); }
 
 .avatar-img {
   display: block;
