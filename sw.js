@@ -1,4 +1,4 @@
-const CACHE = "semaine-v9";
+const CACHE = "semaine-v10";
 const ASSETS = [
   ".",
   "index.html",
@@ -8,6 +8,8 @@ const ASSETS = [
   "icons/icon-180.png",
   "icons/icon-192.png",
   "icons/icon-512.png",
+  "assets/her.png",
+  "assets/him.png",
 ];
 
 self.addEventListener("install", (e) => {

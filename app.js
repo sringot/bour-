@@ -7,67 +7,28 @@
   const SYNC_KEY = "semaine.sync.v1";
   const COLORS = ["#7BC043", "#D9B44A", "#D98E6B", "#8AA0B4"];
 
-  // ---------- Avatars (2 personnages fixes) ----------
+  // ---------- Avatars ----------
 
-  const AVATAR_IDS = ["jill", "lui"];
+  const AVATAR_IDS = ["her", "him"];
+  const AVATAR_BGS = ["#7BC043", "#A3C4EB", "#C4AEE8", "#F2C94C", "#F2994A", "#EB9DB0", "#E8E4DA", "#3C3A36"];
+  const DEFAULT_BG = AVATAR_BGS[0];
 
-  const AVATAR_SVGS = {
-    jill: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100" height="100" rx="22" fill="#7BC043"/>
-      <path d="M50,13 C29,13 19.5,30 21,48 C22,64 16,82 22,100 L78,100 C84,82 78,64 79,48 C80.5,30 71,13 50,13 Z" fill="#53351F"/>
-      <rect x="44.5" y="62" width="11" height="15" rx="5" fill="#E3A16C"/>
-      <path d="M25,100 C25,86 36,79 50,79 C64,79 75,86 75,100 Z" fill="#F2ECDC"/>
-      <path d="M21,46 C18,66 19,84 26,100 L36,100 C31,84 29.5,62 32,48 Z" fill="#53351F"/>
-      <path d="M79,46 C82,66 81,84 74,100 L64,100 C69,84 70.5,62 68,48 Z" fill="#53351F"/>
-      <ellipse cx="50" cy="49" rx="20.5" ry="22.5" fill="#EFB584"/>
-      <path d="M29.5,50 C27,27 38,19.5 50,19.5 C62,19.5 73,27 70.5,50 C68.5,35.5 63,31 58.5,30.5 C54,30 52,33.5 50,33.5 C48,33.5 46,30 41.5,30.5 C37,31 31.5,35.5 29.5,50 Z" fill="#53351F"/>
-      <circle cx="42" cy="50.5" r="4.9" fill="#33241A"/>
-      <circle cx="58" cy="50.5" r="4.9" fill="#33241A"/>
-      <circle cx="43.6" cy="49" r="1.7" fill="#fff"/>
-      <circle cx="59.6" cy="49" r="1.7" fill="#fff"/>
-      <path d="M36.5,42.5 Q41,40.5 45.5,42.3" fill="none" stroke="#3E2B1D" stroke-width="2.1" stroke-linecap="round"/>
-      <path d="M54.5,42.3 Q59,40.5 63.5,42.5" fill="none" stroke="#3E2B1D" stroke-width="2.1" stroke-linecap="round"/>
-      <path d="M50,55 Q48.6,57.8 50.4,58.6" fill="none" stroke="#D9955F" stroke-width="1.6" stroke-linecap="round"/>
-      <path d="M45.5,63 Q50,66 54.5,63" fill="none" stroke="#B96A4B" stroke-width="2" stroke-linecap="round"/>
-      <ellipse cx="34.5" cy="57.5" rx="3.2" ry="1.9" fill="#F0985F" opacity="0.5"/>
-      <ellipse cx="65.5" cy="57.5" rx="3.2" ry="1.9" fill="#F0985F" opacity="0.5"/>
-    </svg>`,
-    lui: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100" height="100" rx="22" fill="#7BC043"/>
-      <rect x="44.5" y="64" width="11" height="15" rx="5" fill="#DD9C60"/>
-      <path d="M25,100 C25,86 36,79 50,79 C64,79 75,86 75,100 Z" fill="#F2ECDC"/>
-      <ellipse cx="50" cy="51" rx="20.5" ry="22.5" fill="#E8A96E"/>
-      <g fill="#4A2E17">
-        <circle cx="32" cy="37" r="9"/>
-        <circle cx="38" cy="28" r="9"/>
-        <circle cx="47" cy="23.5" r="9.5"/>
-        <circle cx="57" cy="24.5" r="9"/>
-        <circle cx="65" cy="29.5" r="9"/>
-        <circle cx="70.5" cy="38" r="8.5"/>
-        <circle cx="28.5" cy="46" r="6.5"/>
-        <circle cx="72.5" cy="47" r="6.5"/>
-        <rect x="28" y="30" width="44" height="15"/>
-        <circle cx="35.5" cy="42.5" r="6.8"/>
-        <circle cx="46" cy="39.5" r="7.8"/>
-        <circle cx="58" cy="40" r="7.3"/>
-        <circle cx="67" cy="44" r="5.8"/>
-      </g>
-      <circle cx="42" cy="53" r="4.9" fill="#33241A"/>
-      <circle cx="58" cy="53" r="4.9" fill="#33241A"/>
-      <circle cx="43.6" cy="51.5" r="1.7" fill="#fff"/>
-      <circle cx="59.6" cy="51.5" r="1.7" fill="#fff"/>
-      <path d="M36,45.5 Q41,43.3 45.8,45.2" fill="none" stroke="#33200F" stroke-width="2.6" stroke-linecap="round"/>
-      <path d="M54.2,45.2 Q59,43.3 64,45.5" fill="none" stroke="#33200F" stroke-width="2.6" stroke-linecap="round"/>
-      <path d="M50,57.5 Q48.6,60.2 50.4,61" fill="none" stroke="#C98A50" stroke-width="1.6" stroke-linecap="round"/>
-      <path d="M43,64.6 Q46.5,62 50,64.2 Q53.5,62 57,64.6 Q53.5,66.6 50,65.8 Q46.5,66.6 43,64.6 Z" fill="#432B18"/>
-      <path d="M46.5,67.5 Q50,70 53.5,67.5" fill="none" stroke="#A5643C" stroke-width="1.8" stroke-linecap="round"/>
-      <path d="M46.8,71.5 Q50,76 53.2,71.5 Q51.8,74.8 50,74.8 Q48.2,74.8 46.8,71.5 Z" fill="#432B18"/>
-    </svg>`,
-  };
-
-  function avatarSVG(id) {
-    return AVATAR_SVGS[id] || AVATAR_SVGS.jill;
+  function normAvatar(a) {
+    if (typeof a === "string") {
+      return { id: a === "lui" || a === "him" ? "him" : "her", bg: DEFAULT_BG };
+    }
+    if (!a || typeof a !== "object" || !AVATAR_IDS.includes(a.id)) {
+      return { id: "her", bg: DEFAULT_BG };
+    }
+    const bg = typeof a.bg === "string" && /^#[0-9a-fA-F]{3,8}$/.test(a.bg) ? a.bg : DEFAULT_BG;
+    return { id: a.id, bg };
   }
+
+  function avatarHTML(a) {
+    const av = normAvatar(a);
+    return `<span class="avatar-img" style="background:${av.bg}"><img src="assets/${av.id}.png" alt=""></span>`;
+  }
+
 
   // ---------- State ----------
 
@@ -79,7 +40,7 @@
   let view = "week";
   let profile = loadProfile();
   let envies = loadEnvies();
-  let obAvatar = "jill";
+  let obAvatar = { id: "her", bg: DEFAULT_BG };
   let pendingEnvieId = null;
   let syncSpace = loadSync();
   let lastSyncAt = null;
@@ -103,7 +64,7 @@
     try {
       const p = JSON.parse(localStorage.getItem(PROFILE_KEY));
       if (!p || !p.name) return null;
-      if (!AVATAR_IDS.includes(p.avatar)) p.avatar = "jill";
+      p.avatar = normAvatar(p.avatar);
       return p;
     } catch {
       return null;
@@ -290,7 +251,7 @@
     const el = document.createElement("span");
     el.className = "mini-avatar";
     el.title = by.n || "";
-    el.innerHTML = avatarSVG(by.a);
+    el.innerHTML = avatarHTML(by.a);
     return el;
   }
 
@@ -318,7 +279,7 @@
     const hour = new Date().getHours();
     $("greetWord").textContent = (hour >= 18 || hour < 5 ? "Bonsoir, " : "Bonjour, ");
     $("greetName").textContent = profile.name;
-    $("avatarEmoji").innerHTML = avatarSVG(profile.avatar);
+    $("avatarEmoji").innerHTML = avatarHTML(profile.avatar);
 
     const now = new Date();
     const todayKey = toKey(now);
@@ -353,18 +314,51 @@
       const card = document.createElement("button");
       card.type = "button";
       card.className = "avatar-card";
-      if (id === obAvatar) card.classList.add("selected");
-      card.innerHTML = `<span class="img">${avatarSVG(id)}</span><span class="who">${id === "jill" ? "Jill" : "Lui"}</span>`;
+      if (id === obAvatar.id) card.classList.add("selected");
+      card.innerHTML = `<span class="img">${avatarHTML({ id, bg: obAvatar.bg })}</span><span class="who">${id === "her" ? "Elle" : "Lui"}</span>`;
       card.addEventListener("click", () => {
-        obAvatar = id;
+        obAvatar.id = id;
         renderAvatarChoice();
       });
       root.appendChild(card);
     }
+
+    const bgRoot = $("bgChoice");
+    bgRoot.innerHTML = "";
+    for (const bg of AVATAR_BGS) {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "bg-dot";
+      dot.style.background = bg;
+      if (bg.toLowerCase() === obAvatar.bg.toLowerCase()) dot.classList.add("selected");
+      dot.addEventListener("click", () => {
+        obAvatar.bg = bg;
+        renderAvatarChoice();
+      });
+      bgRoot.appendChild(dot);
+    }
+    const custom = document.createElement("label");
+    custom.className = "bg-dot custom";
+    if (!AVATAR_BGS.some((b) => b.toLowerCase() === obAvatar.bg.toLowerCase())) {
+      custom.classList.add("selected");
+      custom.style.background = obAvatar.bg;
+    }
+    const input = document.createElement("input");
+    input.type = "color";
+    input.value = /^#[0-9a-fA-F]{6}$/.test(obAvatar.bg) ? obAvatar.bg : DEFAULT_BG;
+    input.addEventListener("input", () => {
+      obAvatar.bg = input.value;
+      $("avatarChoice").querySelectorAll(".avatar-img").forEach((el) => { el.style.background = input.value; });
+      bgRoot.querySelectorAll(".bg-dot").forEach((d) => d.classList.remove("selected"));
+      custom.classList.add("selected");
+      custom.style.background = input.value;
+    });
+    custom.appendChild(input);
+    bgRoot.appendChild(custom);
   }
 
   function openOnboard(step) {
-    obAvatar = profile ? profile.avatar : "jill";
+    obAvatar = profile ? { ...normAvatar(profile.avatar) } : { id: "her", bg: DEFAULT_BG };
     $("obName").value = profile ? profile.name : "";
     $("obDone").textContent = profile ? "Enregistrer" : "Commencer";
     $("obStep1").hidden = step === 2;
@@ -391,7 +385,7 @@
   });
 
   $("obDone").addEventListener("click", () => {
-    profile = { name: $("obName").value.trim(), avatar: obAvatar };
+    profile = { name: $("obName").value.trim(), avatar: { ...obAvatar } };
     saveProfile();
     const ob = $("onboard");
     ob.classList.add("hide");
@@ -410,7 +404,7 @@
 
   function renderProfile() {
     if (!profile) return;
-    $("profileAvatar").innerHTML = avatarSVG(profile.avatar);
+    $("profileAvatar").innerHTML = avatarHTML(profile.avatar);
     $("profileName").textContent = profile.name;
 
     const todayKey = toKey(new Date());
