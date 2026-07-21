@@ -19,6 +19,18 @@
 
     <div id="weekView">
 
+    <header class="greet">
+      <div>
+        <p class="greet-hello">
+          <span id="greetWord"></span><span id="greetName" class="greet-name"></span>
+        </p>
+        <p id="greetSub" class="greet-sub"></p>
+      </div>
+      <button id="profileBtn" class="avatar-btn" aria-label="Profil">
+        <span id="avatarEmoji"></span>
+      </button>
+    </header>
+
     <header class="header">
       <h1 id="monthLabel" class="month"></h1>
       <div class="header-actions">
@@ -60,6 +72,18 @@
       <svg viewBox="0 0 24 24"><path d="M5 6.5h14M5 12h14M5 17.5h9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     </button>
   </nav>
+
+  <div id="onboard" class="onboard" hidden>
+    <div class="onboard-inner">
+      <div id="obPreview" class="onboard-preview"></div>
+      <h2 class="onboard-title">Bienvenue</h2>
+      <p class="onboard-sub">Comment tu t'appelles ?</p>
+      <input id="obName" class="field field-title" type="text" placeholder="Prénom" maxlength="20" autocomplete="off">
+      <p class="onboard-sub">Choisis un avatar</p>
+      <div id="avatarGrid" class="avatar-grid"></div>
+      <button id="obDone" class="btn btn-primary onboard-btn">Commencer</button>
+    </div>
+  </div>
 
   <div id="overlay" class="overlay" hidden></div>
 

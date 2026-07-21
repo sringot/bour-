@@ -2,7 +2,9 @@
   "use strict";
 
   const STORE_KEY = "semaine.plans.v1";
+  const PROFILE_KEY = "semaine.profile.v1";
   const COLORS = ["#374785", "#F76C6C", "#F8E9A1", "#A8D0E6"];
+  const AVATARS = ["🙂", "😎", "🦊", "🐻", "🌸", "🌙", "⭐", "🍀"];
 
   // ---------- State ----------
 
@@ -12,6 +14,8 @@
   let editingId = null;
   let selectedColor = COLORS[0];
   let view = "week";
+  let profile = loadProfile();
+  let obAvatar = AVATARS[0];
 
   // ---------- Storage ----------
 
@@ -25,6 +29,19 @@
 
   function save() {
     localStorage.setItem(STORE_KEY, JSON.stringify(plans));
+  }
+
+  function loadProfile() {
+    try {
+      const p = JSON.parse(localStorage.getItem(PROFILE_KEY));
+      return p && p.name ? p : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function saveProfile() {
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
   }
 
   // ---------- Date utils ----------
@@ -96,6 +113,8 @@
       return;
     }
 
+    renderGreeting();
+
     const days = weekDays();
     const todayKey = toKey(new Date());
 
@@ -161,6 +180,79 @@
     card.addEventListener("click", () => openSheet(item));
     return card;
   }
+
+  function renderGreeting() {
+    if (!profile) return;
+    const hour = new Date().getHours();
+    $("greetWord").textContent = (hour >= 18 || hour < 5 ? "Bonsoir, " : "Bonjour, ");
+    $("greetName").textContent = profile.name;
+    $("avatarEmoji").textContent = profile.avatar;
+
+    const now = new Date();
+    const todayKey = toKey(now);
+    const hm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    const next = plans
+      .filter((p) => p.date > todayKey || (p.date === todayKey && p.start >= hm))
+      .sort((a, b) => a.date.localeCompare(b.date) || a.start.localeCompare(b.start))[0];
+
+    if (!next) {
+      $("greetSub").textContent = "Rien de prévu pour l'instant";
+      return;
+    }
+    const tomorrowKey = toKey(addDays(now, 1));
+    const when =
+      next.date === todayKey ? "aujourd'hui" :
+      next.date === tomorrowKey ? "demain" :
+      fmtGroup.format(fromKey(next.date));
+    $("greetSub").textContent = `Prochain plan : ${next.title} · ${when} à ${next.start}`;
+  }
+
+  // ---------- Onboarding ----------
+
+  function renderAvatarGrid() {
+    const grid = $("avatarGrid");
+    grid.innerHTML = "";
+    for (const emoji of AVATARS) {
+      const btn = document.createElement("button");
+      btn.className = "avatar-opt";
+      btn.type = "button";
+      btn.textContent = emoji;
+      if (emoji === obAvatar) btn.classList.add("selected");
+      btn.addEventListener("click", () => {
+        obAvatar = emoji;
+        $("obPreview").textContent = emoji;
+        renderAvatarGrid();
+      });
+      grid.appendChild(btn);
+    }
+  }
+
+  function openOnboard() {
+    obAvatar = profile ? profile.avatar : AVATARS[0];
+    $("obName").value = profile ? profile.name : "";
+    $("obPreview").textContent = obAvatar;
+    $("obDone").textContent = profile ? "Enregistrer" : "Commencer";
+    renderAvatarGrid();
+    const ob = $("onboard");
+    ob.hidden = false;
+    ob.classList.remove("hide");
+  }
+
+  $("obDone").addEventListener("click", () => {
+    const name = $("obName").value.trim();
+    if (!name) {
+      $("obName").focus();
+      return;
+    }
+    profile = { name, avatar: obAvatar };
+    saveProfile();
+    const ob = $("onboard");
+    ob.classList.add("hide");
+    setTimeout(() => { ob.hidden = true; }, 400);
+    render();
+  });
+
+  $("profileBtn").addEventListener("click", openOnboard);
 
   function renderUpcoming() {
     const list = $("upcomingList");
@@ -315,4 +407,5 @@
   }
 
   render();
+  if (!profile) openOnboard();
 })();
