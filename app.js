@@ -130,11 +130,12 @@
       return;
     }
 
-    for (const item of items) {
+    items.forEach((item, i) => {
       const card = document.createElement("button");
       card.className = "plan-card";
       card.type = "button";
       card.style.setProperty("--plan-color", item.color);
+      card.style.setProperty("--i", i);
       const time = item.end ? `${item.start} – ${item.end}` : item.start;
       card.innerHTML = `
         <div class="time">${time}</div>
@@ -144,7 +145,7 @@
       if (item.note) card.querySelector(".note").textContent = item.note;
       card.addEventListener("click", () => openSheet(item));
       planList.appendChild(card);
-    }
+    });
   }
 
   // ---------- Sheet ----------
