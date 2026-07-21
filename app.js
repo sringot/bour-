@@ -633,13 +633,35 @@
     }
   }
 
+  // fetch avec une nouvelle tentative après un court délai (blip réseau)
+  async function fetchRetry(url, opts, tries = 2) {
+    for (let i = 0; ; i++) {
+      try {
+        return await fetch(url, opts);
+      } catch (err) {
+        if (i >= tries - 1) throw err;
+        await new Promise((r) => setTimeout(r, 600 * (i + 1)));
+      }
+    }
+  }
+
   let syncing = false;
+  let expiredNotified = false;
 
   async function syncNow() {
     if (!syncSpace || syncing) return;
     syncing = true;
     try {
-      const res = await fetch(`${API_BASE}/${syncSpace.id}`, { cache: "no-store" });
+      const res = await fetchRetry(`${API_BASE}/${syncSpace.id}`, { cache: "no-store" });
+      if (res.status === 404) {
+        // L'espace partagé n'existe plus (expiré / supprimé) : on prévient une fois.
+        if (!expiredNotified) {
+          expiredNotified = true;
+          toast("Espace de synchro expiré · renvoie une invitation");
+        }
+        return;
+      }
+      expiredNotified = false;
       let changed = false;
       let fresh = [];
       if (res.ok) {
@@ -650,7 +672,7 @@
         changed = c1 || c2;
         fresh = [...f1, ...f2];
       }
-      await fetch(`${API_BASE}/${syncSpace.id}`, {
+      await fetchRetry(`${API_BASE}/${syncSpace.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ v: 1, p: plans, e: envies }),
