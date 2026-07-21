@@ -5,12 +5,12 @@
   const PROFILE_KEY = "semaine.profile.v1";
   const ENVIES_KEY = "semaine.envies.v1";
   const SYNC_KEY = "semaine.sync.v1";
-  const COLORS = ["#7BC043", "#D9B44A", "#D98E6B", "#8AA0B4"];
+  const COLORS = ["#8D9A66", "#D9B44A", "#D98E6B", "#8AA0B4"];
 
   // ---------- Avatars ----------
 
   const AVATAR_IDS = ["her", "him"];
-  const AVATAR_BGS = ["#7BC043", "#A3C4EB", "#C4AEE8", "#F2C94C", "#F2994A", "#EB9DB0", "#E8E4DA", "#3C3A36"];
+  const AVATAR_BGS = ["#9CA97B", "#A3C4EB", "#C4AEE8", "#F2C94C", "#F2994A", "#EB9DB0", "#E8E4DA", "#3C3A36"];
   const DEFAULT_BG = AVATAR_BGS[0];
 
   function normAvatar(a) {

@@ -9,8 +9,9 @@
   --hairline: rgba(22, 22, 19, 0.1);
   --primary: #161613;
   --on-primary: #FFFFFF;
-  --accent: #6AB03C;
-  --c1: #7BC043;
+  --accent: #7E8C5A;
+  --accent-ink: #68744A;
+  --c1: #8D9A66;
   --c2: #D9B44A;
   --c3: #D98E6B;
   --c4: #8AA0B4;
@@ -34,7 +35,8 @@
     --hairline: rgba(245, 245, 242, 0.12);
     --primary: #F5F5F2;
     --on-primary: #161613;
-    --accent: #8CC963;
+    --accent: #A7B67D;
+    --accent-ink: #B2C089;
     --glass: rgba(13, 13, 12, 0.82);
     --bar: rgba(30, 30, 28, 0.92);
     --card-shadow: none;
@@ -103,7 +105,7 @@ button {
   color: #fff;
   display: grid;
   place-items: center;
-  box-shadow: 0 12px 34px rgba(106, 176, 60, 0.4);
+  box-shadow: 0 12px 34px rgba(126, 140, 90, 0.38);
   animation: splashPop 0.65s var(--spring) both;
 }
 
@@ -203,7 +205,7 @@ button {
 }
 
 .greet-sub .countdown {
-  color: var(--accent);
+  color: var(--accent-ink);
   font-weight: 600;
 }
 
@@ -361,7 +363,7 @@ button {
 }
 
 .day-pill.today:not(.selected) .num {
-  color: var(--accent);
+  color: var(--accent-ink);
   font-weight: 700;
 }
 
@@ -895,7 +897,7 @@ label.field input:focus { outline: none; }
 }
 
 .bg-dot.custom {
-  background: conic-gradient(#F26D6D, #F2C94C, #7BC043, #56AEE8, #9B7BE8, #F26D6D);
+  background: conic-gradient(#F26D6D, #F2C94C, #8D9A66, #56AEE8, #9B7BE8, #F26D6D);
 }
 
 .bg-dot.custom input {
