@@ -1,4 +1,4 @@
-const CACHE = "semaine-v2";
+const CACHE = "semaine-v3";
 const ASSETS = [
   ".",
   "index.html",

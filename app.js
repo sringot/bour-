@@ -2,7 +2,7 @@
   "use strict";
 
   const STORE_KEY = "semaine.plans.v1";
-  const COLORS = ["#5B51E8", "#E8657A", "#E8A94C", "#4CAF9C"];
+  const COLORS = ["#374785", "#F76C6C", "#F8E9A1", "#A8D0E6"];
 
   // ---------- State ----------
 
@@ -11,6 +11,7 @@
   let weekStart = mondayOf(new Date());
   let editingId = null;
   let selectedColor = COLORS[0];
+  let view = "week";
 
   // ---------- Storage ----------
 
@@ -60,6 +61,7 @@
   const fmtMonth = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
   const fmtDow = new Intl.DateTimeFormat("fr-FR", { weekday: "short" });
   const fmtFull = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+  const fmtGroup = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "short" });
 
   // ---------- Elements ----------
 
@@ -84,6 +86,16 @@
   // ---------- Rendering ----------
 
   function render() {
+    $("weekView").hidden = view !== "week";
+    $("upcomingView").hidden = view !== "upcoming";
+    $("navWeek").classList.toggle("active", view === "week");
+    $("navUpcoming").classList.toggle("active", view === "upcoming");
+
+    if (view === "upcoming") {
+      renderUpcoming();
+      return;
+    }
+
     const days = weekDays();
     const todayKey = toKey(new Date());
 
@@ -130,22 +142,58 @@
       return;
     }
 
-    items.forEach((item, i) => {
-      const card = document.createElement("button");
-      card.className = "plan-card";
-      card.type = "button";
-      card.style.setProperty("--plan-color", item.color);
-      card.style.setProperty("--i", i);
-      const time = item.end ? `${item.start} – ${item.end}` : item.start;
-      card.innerHTML = `
-        <div class="time">${time}</div>
-        <div class="title"></div>
-        ${item.note ? '<div class="note"></div>' : ""}`;
-      card.querySelector(".title").textContent = item.title;
-      if (item.note) card.querySelector(".note").textContent = item.note;
-      card.addEventListener("click", () => openSheet(item));
-      planList.appendChild(card);
-    });
+    items.forEach((item, i) => planList.appendChild(makeCard(item, i)));
+  }
+
+  function makeCard(item, i) {
+    const card = document.createElement("button");
+    card.className = "plan-card";
+    card.type = "button";
+    card.style.setProperty("--plan-color", item.color);
+    card.style.setProperty("--i", i);
+    const time = item.end ? `${item.start} – ${item.end}` : item.start;
+    card.innerHTML = `
+      <div class="time">${time}</div>
+      <div class="title"></div>
+      ${item.note ? '<div class="note"></div>' : ""}`;
+    card.querySelector(".title").textContent = item.title;
+    if (item.note) card.querySelector(".note").textContent = item.note;
+    card.addEventListener("click", () => openSheet(item));
+    return card;
+  }
+
+  function renderUpcoming() {
+    const list = $("upcomingList");
+    const todayKey = toKey(new Date());
+    const items = plans
+      .filter((p) => p.date >= todayKey)
+      .sort((a, b) => a.date.localeCompare(b.date) || a.start.localeCompare(b.start));
+
+    list.innerHTML = "";
+
+    if (items.length === 0) {
+      list.innerHTML = `
+        <div class="empty">
+          <div class="circle"></div>
+          <p>Rien de prévu pour le moment</p>
+        </div>`;
+      return;
+    }
+
+    let lastDate = null;
+    let i = 0;
+    for (const item of items) {
+      if (item.date !== lastDate) {
+        lastDate = item.date;
+        const label = document.createElement("p");
+        label.className = "group-label";
+        label.style.setProperty("--i", i);
+        label.textContent = item.date === todayKey ? "Aujourd'hui" : fmtGroup.format(fromKey(item.date));
+        list.appendChild(label);
+      }
+      list.appendChild(makeCard(item, i));
+      i += 1;
+    }
   }
 
   // ---------- Sheet ----------
@@ -234,6 +282,16 @@
 
   $("addBtn").addEventListener("click", () => openSheet(null));
   overlay.addEventListener("click", closeSheet);
+
+  $("navWeek").addEventListener("click", () => {
+    view = "week";
+    render();
+  });
+
+  $("navUpcoming").addEventListener("click", () => {
+    view = "upcoming";
+    render();
+  });
 
   $("prevWeek").addEventListener("click", () => shiftWeek(-7));
   $("nextWeek").addEventListener("click", () => shiftWeek(7));

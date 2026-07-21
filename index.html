@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
   <title>Semaine</title>
-  <meta name="theme-color" content="#E7E6F0">
+  <meta name="theme-color" content="#E4EEF6">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -16,6 +16,8 @@
 </head>
 <body>
   <main class="app">
+
+    <div id="weekView">
 
     <header class="header">
       <h1 id="monthLabel" class="month"></h1>
@@ -36,11 +38,28 @@
 
     <section id="planList" class="plan-list"></section>
 
-    <button id="addBtn" class="fab" aria-label="Ajouter">
-      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-    </button>
+    </div>
+
+    <div id="upcomingView" hidden>
+      <header class="header">
+        <h1 class="month">À venir</h1>
+      </header>
+      <section id="upcomingList" class="plan-list"></section>
+    </div>
 
   </main>
+
+  <nav class="navbar" aria-label="Navigation">
+    <button id="navWeek" class="nav-btn active" aria-label="Semaine">
+      <svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 10h16M8.5 3.5v3.5M15.5 3.5v3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+    <button id="addBtn" class="nav-add" aria-label="Ajouter">
+      <svg viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    </button>
+    <button id="navUpcoming" class="nav-btn" aria-label="À venir">
+      <svg viewBox="0 0 24 24"><path d="M5 6.5h14M5 12h14M5 17.5h9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+  </nav>
 
   <div id="overlay" class="overlay" hidden></div>
 
