@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>Semaine</title>
+  <meta name="theme-color" content="#F4F3FA">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Semaine">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+
+    <header class="header">
+      <h1 id="monthLabel" class="month"></h1>
+      <div class="header-actions">
+        <button id="todayBtn" class="today-btn" hidden>Aujourd'hui</button>
+        <button id="prevWeek" class="icon-btn" aria-label="Semaine précédente">
+          <svg viewBox="0 0 24 24"><path d="M14.5 6.5 9 12l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button id="nextWeek" class="icon-btn" aria-label="Semaine suivante">
+          <svg viewBox="0 0 24 24"><path d="M9.5 6.5 15 12l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <nav id="weekStrip" class="week-strip" aria-label="Jours de la semaine"></nav>
+
+    <p id="dayLabel" class="day-label"></p>
+
+    <section id="planList" class="plan-list"></section>
+
+    <button id="addBtn" class="fab" aria-label="Ajouter">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    </button>
+
+  </main>
+
+  <div id="overlay" class="overlay" hidden></div>
+
+  <div id="sheet" class="sheet" role="dialog" aria-modal="true" hidden>
+    <div class="sheet-handle"></div>
+    <form id="planForm" autocomplete="off">
+      <input id="fTitle" class="field field-title" type="text" placeholder="Titre" maxlength="60" required>
+
+      <div class="field-row">
+        <label class="field field-half">
+          <span class="field-label">Début</span>
+          <input id="fStart" type="time" required>
+        </label>
+        <label class="field field-half">
+          <span class="field-label">Fin</span>
+          <input id="fEnd" type="time">
+        </label>
+      </div>
+
+      <label class="field">
+        <span class="field-label">Jour</span>
+        <input id="fDate" type="date" required>
+      </label>
+
+      <input id="fNote" class="field" type="text" placeholder="Note (optionnel)" maxlength="120">
+
+      <div class="color-row" id="colorRow" role="radiogroup" aria-label="Couleur"></div>
+
+      <div class="sheet-actions">
+        <button type="button" id="deleteBtn" class="btn btn-danger" hidden>Supprimer</button>
+        <button type="submit" id="saveBtn" class="btn btn-primary">Ajouter</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
