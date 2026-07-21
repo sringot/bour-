@@ -812,6 +812,41 @@ label.field input:focus { outline: none; }
   animation: rise 0.4s var(--ease) 100ms backwards;
 }
 
+.duo-code-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--inset-bg);
+  box-shadow: var(--in);
+  border-radius: 14px;
+  padding: 12px 12px 12px 16px;
+  margin-bottom: 14px;
+  animation: rise 0.4s var(--ease) 60ms backwards;
+}
+
+.duo-code {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  word-break: break-all;
+  user-select: all;
+  -webkit-user-select: all;
+}
+
+.duo-leave {
+  display: block;
+  margin: 18px auto 0;
+  border: none;
+  background: none;
+  color: var(--accent-warm);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0.85;
+}
+
 .duo-status {
   font-size: 13px;
   font-weight: 600;

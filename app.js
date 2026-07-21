@@ -4,6 +4,7 @@
   const STORE_KEY = "semaine.plans.v1";
   const PROFILE_KEY = "semaine.profile.v1";
   const ENVIES_KEY = "semaine.envies.v1";
+  const SYNC_KEY = "semaine.sync.v1";
   const COLORS = ["#374785", "#F76C6C", "#F8E9A1", "#A8D0E6"];
 
   // ---------- Avatar ----------
@@ -81,6 +82,8 @@
   let envies = loadEnvies();
   let avatarCfg = { ...DEFAULT_AVATAR };
   let pendingEnvieId = null;
+  let syncSpace = loadSync();
+  let lastSyncAt = null;
 
   // ---------- Storage ----------
 
@@ -94,6 +97,7 @@
 
   function save() {
     localStorage.setItem(STORE_KEY, JSON.stringify(plans));
+    scheduleSync();
   }
 
   function loadProfile() {
@@ -121,6 +125,23 @@
 
   function saveEnvies() {
     localStorage.setItem(ENVIES_KEY, JSON.stringify(envies));
+    scheduleSync();
+  }
+
+  function persist() {
+    localStorage.setItem(STORE_KEY, JSON.stringify(plans));
+    localStorage.setItem(ENVIES_KEY, JSON.stringify(envies));
+  }
+
+  const livePlans = () => plans.filter((p) => !p.del);
+  const liveEnvies = () => envies.filter((e) => !e.del);
+
+  // Purge des suppressions synchronisées depuis plus de 60 jours
+  {
+    const cutoff = Date.now() - 60 * 24 * 60 * 60 * 1000;
+    const keep = (it) => !it.del || (it.u || 0) > cutoff;
+    plans = plans.filter(keep);
+    envies = envies.filter(keep);
   }
 
   // ---------- Date utils ----------
@@ -198,7 +219,10 @@
       renderEnvies();
       return;
     }
-    if (view === "duo") return;
+    if (view === "duo") {
+      renderDuo();
+      return;
+    }
 
     renderGreeting();
 
@@ -216,7 +240,7 @@
       pill.type = "button";
       if (key === selectedDate) pill.classList.add("selected");
       if (key === todayKey) pill.classList.add("today");
-      if (plans.some((p) => p.date === key)) pill.classList.add("has-plans");
+      if (plans.some((p) => p.date === key && !p.del)) pill.classList.add("has-plans");
       pill.innerHTML = `
         <span class="dow">${fmtDow.format(day).replace(".", "")}</span>
         <span class="num">${day.getDate()}</span>
@@ -233,7 +257,7 @@
   }
 
   function renderList() {
-    const items = plans
+    const items = livePlans()
       .filter((p) => p.date === selectedDate)
       .sort((a, b) => a.start.localeCompare(b.start));
 
@@ -278,7 +302,7 @@
     const now = new Date();
     const todayKey = toKey(now);
     const hm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-    const next = plans
+    const next = livePlans()
       .filter((p) => p.date > todayKey || (p.date === todayKey && p.start >= hm))
       .sort((a, b) => a.date.localeCompare(b.date) || a.start.localeCompare(b.start))[0];
 
@@ -394,8 +418,9 @@
   function renderEnvies() {
     const list = $("envieList");
     list.innerHTML = "";
+    const items = liveEnvies();
 
-    if (envies.length === 0) {
+    if (items.length === 0) {
       list.innerHTML = `
         <div class="empty">
           <div class="circle"></div>
@@ -404,7 +429,7 @@
       return;
     }
 
-    envies.forEach((envie, i) => {
+    items.forEach((envie, i) => {
       const card = document.createElement("div");
       card.className = "plan-card envie-card";
       card.style.setProperty("--plan-color", "#F8E9A1");
@@ -431,7 +456,8 @@
       del.setAttribute("aria-label", "Supprimer");
       del.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
       del.addEventListener("click", () => {
-        envies = envies.filter((e) => e.id !== envie.id);
+        envie.del = 1;
+        envie.u = Date.now();
         saveEnvies();
         renderEnvies();
       });
@@ -445,84 +471,194 @@
     e.preventDefault();
     const title = $("envieInput").value.trim();
     if (!title) return;
-    envies.push({ id: crypto.randomUUID(), title });
+    envies.push({ id: crypto.randomUUID(), title, u: Date.now() });
     saveEnvies();
     $("envieInput").value = "";
     renderEnvies();
   });
 
-  // ---------- Duo (partage / import) ----------
+  // ---------- Duo (synchro automatique) ----------
 
-  function encodeShare() {
-    const json = JSON.stringify({ p: plans, e: envies });
-    return "SEM1:" + btoa(unescape(encodeURIComponent(json)));
+  const API_BASE = localStorage.getItem("semaine.apiBase") || "https://jsonblob.com/api/jsonBlob";
+
+  function loadSync() {
+    try {
+      return JSON.parse(localStorage.getItem(SYNC_KEY));
+    } catch {
+      return null;
+    }
+  }
+
+  function saveSync() {
+    if (syncSpace) localStorage.setItem(SYNC_KEY, JSON.stringify(syncSpace));
+    else localStorage.removeItem(SYNC_KEY);
   }
 
   function setDuoStatus(msg) {
     $("duoStatus").textContent = msg;
-    setTimeout(() => { $("duoStatus").textContent = ""; }, 5000);
+    clearTimeout(setDuoStatus.t);
+    setDuoStatus.t = setTimeout(() => { $("duoStatus").textContent = ""; }, 5000);
   }
 
-  $("shareBtn").addEventListener("click", async () => {
-    const code = encodeShare();
-    const text = `Mon planning · colle ce code dans l'app (À deux → Importer) :\n${code}`;
+  function renderDuo() {
+    $("duoUnpaired").hidden = !!syncSpace;
+    $("duoPaired").hidden = !syncSpace;
+    if (!syncSpace) return;
+    $("duoCode").textContent = syncSpace.id;
+    if (!lastSyncAt) {
+      $("syncInfo").textContent = "Espace créé. Partage le code avec l'autre téléphone.";
+    } else {
+      const mins = Math.round((Date.now() - lastSyncAt) / 60000);
+      $("syncInfo").textContent = mins < 1 ? "Synchronisé à l'instant ✓" : `Synchronisé il y a ${mins} min ✓`;
+    }
+  }
+
+  function mergeLists(local, incoming) {
+    const map = new Map(local.map((it) => [it.id, it]));
+    let changed = false;
+    for (const it of incoming || []) {
+      if (!it || !it.id) continue;
+      const cur = map.get(it.id);
+      if (!cur) {
+        map.set(it.id, it);
+        changed = true;
+      } else if ((it.u || 0) > (cur.u || 0)) {
+        map.set(it.id, it);
+        changed = true;
+      }
+    }
+    return [Array.from(map.values()), changed];
+  }
+
+  let syncing = false;
+
+  async function syncNow() {
+    if (!syncSpace || syncing) return;
+    syncing = true;
     try {
-      if (navigator.share) {
-        await navigator.share({ text });
-        setDuoStatus("Partagé ✓");
-      } else {
-        await navigator.clipboard.writeText(text);
-        setDuoStatus("Copié dans le presse-papiers ✓");
+      const res = await fetch(`${API_BASE}/${syncSpace.id}`, { cache: "no-store" });
+      let changed = false;
+      if (res.ok) {
+        const remote = await res.json();
+        let c1, c2;
+        [plans, c1] = mergeLists(plans, remote.p);
+        [envies, c2] = mergeLists(envies, remote.e);
+        changed = c1 || c2;
+      }
+      await fetch(`${API_BASE}/${syncSpace.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ v: 1, p: plans, e: envies }),
+      });
+      lastSyncAt = Date.now();
+      if (changed) {
+        persist();
+        render();
+      }
+      renderDuo();
+    } catch {
+      if (view === "duo") setDuoStatus("Hors ligne · réessaiera automatiquement");
+    } finally {
+      syncing = false;
+    }
+  }
+
+  function scheduleSync() {
+    if (!syncSpace) return;
+    clearTimeout(scheduleSync.t);
+    scheduleSync.t = setTimeout(syncNow, 1500);
+  }
+
+  $("createSpaceBtn").addEventListener("click", async () => {
+    setDuoStatus("Création de l'espace…");
+    try {
+      const res = await fetch(API_BASE, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ v: 1, p: plans, e: envies }),
+      });
+      const loc = res.headers.get("Location") || "";
+      const id = loc.split("/").filter(Boolean).pop();
+      if (!res.ok || !id) throw new Error();
+      syncSpace = { id };
+      saveSync();
+      lastSyncAt = Date.now();
+      renderDuo();
+      setDuoStatus("Espace créé ✓");
+    } catch {
+      setDuoStatus("Impossible de créer l'espace · vérifie ta connexion");
+    }
+  });
+
+  $("joinBtn").addEventListener("click", async () => {
+    const id = $("joinInput").value.trim().split("/").filter(Boolean).pop();
+    if (!id) return;
+    setDuoStatus("Connexion…");
+    try {
+      const res = await fetch(`${API_BASE}/${id}`, { cache: "no-store" });
+      if (!res.ok) throw new Error();
+      const remote = await res.json();
+      if (!remote || remote.v !== 1) throw new Error();
+      syncSpace = { id };
+      saveSync();
+      [plans] = mergeLists(plans, remote.p);
+      [envies] = mergeLists(envies, remote.e);
+      persist();
+      await fetch(`${API_BASE}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ v: 1, p: plans, e: envies }),
+      });
+      lastSyncAt = Date.now();
+      $("joinInput").value = "";
+      renderDuo();
+      render();
+      setDuoStatus("Espace rejoint ✓");
+    } catch {
+      syncSpace = null;
+      saveSync();
+      setDuoStatus("Code introuvable · vérifie-le");
+    }
+  });
+
+  $("shareCodeBtn").addEventListener("click", async () => {
+    const text = `Notre code Semaine : ${syncSpace.id}\nDans l'app : À deux → Rejoindre avec un code`;
+    try {
+      if (navigator.share) await navigator.share({ text });
+      else {
+        await navigator.clipboard.writeText(syncSpace.id);
+        setDuoStatus("Code copié ✓");
       }
     } catch {
       /* partage annulé */
     }
   });
 
-  $("importBtn").addEventListener("click", () => {
-    const raw = $("importInput").value;
-    const match = raw.match(/SEM1:[A-Za-z0-9+/=]+/);
-    if (!match) {
-      setDuoStatus("Code non reconnu");
-      return;
-    }
-    try {
-      const json = decodeURIComponent(escape(atob(match[0].slice(5))));
-      const data = JSON.parse(json);
-      const knownPlans = new Set(plans.map((p) => p.id));
-      const knownEnvies = new Set(envies.map((e) => e.id));
-      let added = 0;
+  $("syncNowBtn").addEventListener("click", async () => {
+    await syncNow();
+    if (lastSyncAt) setDuoStatus("Synchronisé ✓");
+  });
 
-      for (const p of data.p || []) {
-        if (!p.id || !p.title || !p.date || !p.start) continue;
-        if (knownPlans.has(p.id)) {
-          const idx = plans.findIndex((x) => x.id === p.id);
-          plans[idx] = p;
-        } else {
-          plans.push(p);
-          added += 1;
-        }
-      }
-      for (const e of data.e || []) {
-        if (!e.id || !e.title) continue;
-        if (!knownEnvies.has(e.id)) {
-          envies.push(e);
-          added += 1;
-        }
-      }
-      save();
-      saveEnvies();
-      $("importInput").value = "";
-      setDuoStatus(added > 0 ? `Import réussi · ${added} nouveauté${added > 1 ? "s" : ""} ✓` : "Import réussi · déjà à jour ✓");
-    } catch {
-      setDuoStatus("Code non reconnu");
-    }
+  $("leaveBtn").addEventListener("click", () => {
+    syncSpace = null;
+    lastSyncAt = null;
+    saveSync();
+    renderDuo();
+    setDuoStatus("Espace quitté · tes données restent sur ce téléphone");
+  });
+
+  setInterval(() => {
+    if (syncSpace && document.visibilityState === "visible") syncNow();
+  }, 30000);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") syncNow();
   });
 
   function renderUpcoming() {
     const list = $("upcomingList");
     const todayKey = toKey(new Date());
-    const items = plans
+    const items = livePlans()
       .filter((p) => p.date >= todayKey)
       .sort((a, b) => a.date.localeCompare(b.date) || a.start.localeCompare(b.start));
 
@@ -614,6 +750,7 @@
       end: fEnd.value || null,
       note: fNote.value.trim() || null,
       color: selectedColor,
+      u: Date.now(),
     };
     if (!data.title || !data.date || !data.start) return;
 
@@ -626,7 +763,11 @@
     save();
 
     if (pendingEnvieId) {
-      envies = envies.filter((e) => e.id !== pendingEnvieId);
+      const envie = envies.find((e) => e.id === pendingEnvieId);
+      if (envie) {
+        envie.del = 1;
+        envie.u = Date.now();
+      }
       saveEnvies();
       pendingEnvieId = null;
       view = "week";
@@ -639,7 +780,11 @@
   });
 
   deleteBtn.addEventListener("click", () => {
-    plans = plans.filter((p) => p.id !== editingId);
+    const plan = plans.find((p) => p.id === editingId);
+    if (plan) {
+      plan.del = 1;
+      plan.u = Date.now();
+    }
     save();
     closeSheet();
     render();
@@ -691,4 +836,5 @@
 
   render();
   if (!profile) openOnboard(1);
+  if (syncSpace) syncNow();
 })();

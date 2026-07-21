@@ -1,4 +1,4 @@
-const CACHE = "semaine-v5";
+const CACHE = "semaine-v6";
 const ASSETS = [
   ".",
   "index.html",
@@ -26,6 +26,7 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
+  if (new URL(e.request.url).origin !== self.location.origin) return;
   e.respondWith(
     fetch(e.request)
       .then((res) => {

@@ -77,11 +77,28 @@
       <header class="header">
         <h1 class="month">À deux</h1>
       </header>
-      <p class="view-sub">Chacun garde son planning sur son téléphone. Pour vous synchroniser : partage le tien, l'autre l'importe — les plans et envies fusionnent.</p>
-      <button id="shareBtn" class="btn btn-primary duo-btn">Partager mon planning</button>
-      <p class="duo-label">Importer un planning reçu</p>
-      <input id="importInput" class="field" type="text" placeholder="Colle le code ici" autocomplete="off">
-      <button id="importBtn" class="btn btn-secondary duo-btn">Importer</button>
+
+      <div id="duoUnpaired">
+        <p class="view-sub">Un espace commun pour vos deux téléphones : plans et envies se synchronisent automatiquement.</p>
+        <button id="createSpaceBtn" class="btn btn-primary duo-btn">Créer notre espace</button>
+        <p class="duo-label">Ou rejoindre avec un code</p>
+        <input id="joinInput" class="field" type="text" placeholder="Code reçu" autocomplete="off">
+        <button id="joinBtn" class="btn btn-secondary duo-btn">Rejoindre</button>
+      </div>
+
+      <div id="duoPaired" hidden>
+        <p id="syncInfo" class="view-sub"></p>
+        <p class="duo-label">Code de l'espace</p>
+        <div class="duo-code-card">
+          <span id="duoCode" class="duo-code"></span>
+          <button id="shareCodeBtn" class="envie-action" aria-label="Partager le code">
+            <svg viewBox="0 0 24 24"><path d="M12 14.5V4M8.5 7 12 3.5 15.5 7M6 11.5H5.5A1.5 1.5 0 0 0 4 13v6a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19v-6a1.5 1.5 0 0 0-1.5-1.5H18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <button id="syncNowBtn" class="btn btn-secondary duo-btn">Synchroniser maintenant</button>
+        <button id="leaveBtn" class="duo-leave">Quitter l'espace</button>
+      </div>
+
       <p id="duoStatus" class="duo-status"></p>
     </div>
 
