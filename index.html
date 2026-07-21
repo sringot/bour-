@@ -59,11 +59,40 @@
       <section id="upcomingList" class="plan-list"></section>
     </div>
 
+    <div id="enviesView" hidden>
+      <header class="header">
+        <h1 class="month">Envies</h1>
+      </header>
+      <p class="view-sub">La boîte à idées, sans date. Planifie-les quand tu veux.</p>
+      <form id="envieForm" class="envie-form" autocomplete="off">
+        <input id="envieInput" class="field" type="text" placeholder="Une envie…" maxlength="60" required>
+        <button type="submit" class="envie-add" aria-label="Ajouter l'envie">
+          <svg viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        </button>
+      </form>
+      <section id="envieList" class="plan-list"></section>
+    </div>
+
+    <div id="duoView" hidden>
+      <header class="header">
+        <h1 class="month">À deux</h1>
+      </header>
+      <p class="view-sub">Chacun garde son planning sur son téléphone. Pour vous synchroniser : partage le tien, l'autre l'importe — les plans et envies fusionnent.</p>
+      <button id="shareBtn" class="btn btn-primary duo-btn">Partager mon planning</button>
+      <p class="duo-label">Importer un planning reçu</p>
+      <input id="importInput" class="field" type="text" placeholder="Colle le code ici" autocomplete="off">
+      <button id="importBtn" class="btn btn-secondary duo-btn">Importer</button>
+      <p id="duoStatus" class="duo-status"></p>
+    </div>
+
   </main>
 
   <nav class="navbar" aria-label="Navigation">
     <button id="navWeek" class="nav-btn active" aria-label="Semaine">
       <svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 10h16M8.5 3.5v3.5M15.5 3.5v3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+    <button id="navEnvies" class="nav-btn" aria-label="Envies">
+      <svg viewBox="0 0 24 24"><path d="M9.5 18h5M10.5 21h3M12 3.5a5.5 5.5 0 0 0-3 10.1c.8.55 1.5 1.4 1.5 2.4h3c0-1 .7-1.85 1.5-2.4a5.5 5.5 0 0 0-3-10.1Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
     <button id="addBtn" class="nav-add" aria-label="Ajouter">
       <svg viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
@@ -71,18 +100,30 @@
     <button id="navUpcoming" class="nav-btn" aria-label="À venir">
       <svg viewBox="0 0 24 24"><path d="M5 6.5h14M5 12h14M5 17.5h9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     </button>
+    <button id="navDuo" class="nav-btn" aria-label="À deux">
+      <svg viewBox="0 0 24 24"><circle cx="9.5" cy="12" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="15.5" cy="12" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+    </button>
   </nav>
 
   <div id="onboard" class="onboard" hidden>
-    <div class="onboard-inner">
-      <div id="obPreview" class="onboard-preview"></div>
+
+    <div id="obStep1" class="onboard-inner">
+      <div class="onboard-preview">
+        <svg viewBox="0 0 48 48"><circle cx="19" cy="24" r="11" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="31" cy="24" r="11" fill="#374785"/></svg>
+      </div>
       <h2 class="onboard-title">Bienvenue</h2>
       <p class="onboard-sub">Comment tu t'appelles ?</p>
       <input id="obName" class="field field-title" type="text" placeholder="Prénom" maxlength="20" autocomplete="off">
-      <p class="onboard-sub">Choisis un avatar</p>
-      <div id="avatarGrid" class="avatar-grid"></div>
+      <button id="obNext" class="btn btn-primary onboard-btn">Continuer</button>
+    </div>
+
+    <div id="obStep2" class="onboard-inner" hidden>
+      <div id="obAvatar" class="ob-avatar"></div>
+      <h2 class="onboard-title">Ton avatar</h2>
+      <div id="builder" class="builder"></div>
       <button id="obDone" class="btn btn-primary onboard-btn">Commencer</button>
     </div>
+
   </div>
 
   <div id="overlay" class="overlay" hidden></div>

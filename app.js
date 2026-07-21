@@ -3,8 +3,71 @@
 
   const STORE_KEY = "semaine.plans.v1";
   const PROFILE_KEY = "semaine.profile.v1";
+  const ENVIES_KEY = "semaine.envies.v1";
   const COLORS = ["#374785", "#F76C6C", "#F8E9A1", "#A8D0E6"];
-  const AVATARS = ["🙂", "😎", "🦊", "🐻", "🌸", "🌙", "⭐", "🍀"];
+
+  // ---------- Avatar ----------
+
+  const SKINS = ["#5C3A2E", "#8D5524", "#C68642", "#E8B98A", "#F6D7B0"];
+  const HAIR_COLORS = ["#EDE3B4", "#2A2A2A", "#6B4423", "#A5462C", "#F567C8"];
+  const HAIR_STYLES = [["long", "Longs"], ["short", "Courts"], ["bun", "Chignon"], ["curly", "Bouclés"], ["none", "Rasé"]];
+  const HAT_COLORS = ["none", "#F567C8", "#F76C6C", "#374785", "#F8E9A1"];
+  const TOP_COLORS = ["#F79256", "#F567C8", "#374785", "#4C9A6E", "#A89BE0"];
+  const BG_COLORS = ["#4A7C59", "#B9AEE8", "#A8D0E6", "#F5A9A0", "#F2D06B"];
+
+  const DEFAULT_AVATAR = {
+    skin: SKINS[0],
+    hairStyle: "long",
+    hairColor: HAIR_COLORS[0],
+    hat: HAT_COLORS[1],
+    top: TOP_COLORS[0],
+    bg: BG_COLORS[0],
+  };
+
+  function avatarSVG(c) {
+    const S = 'stroke="#1F1B16" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"';
+    let hairBack = "";
+    let hairFront = "";
+
+    if (c.hairStyle === "long") {
+      hairBack = `<path d="M22,98 C13,64 18,42 30,30 L70,30 C82,42 87,64 78,98
+        C72,80 74,66 70,58 C66,74 60,72 62,88 C50,80 50,80 38,88 C40,72 34,74 30,58 C26,66 28,80 22,98 Z"
+        fill="${c.hairColor}" ${S}/>`;
+    }
+
+    if (c.hat === "none" && c.hairStyle !== "none") {
+      if (c.hairStyle === "short" || c.hairStyle === "long") {
+        hairFront = `<path d="M32.5,34 C32,18 42,13.5 50,13.5 C58,13.5 68,18 67.5,34 C61,25.5 39,25.5 32.5,34 Z" fill="${c.hairColor}" ${S}/>`;
+      } else if (c.hairStyle === "bun") {
+        hairFront = `<circle cx="50" cy="12.5" r="6.8" fill="${c.hairColor}" ${S}/>
+          <path d="M32.5,34 C32,18 42,13.5 50,13.5 C58,13.5 68,18 67.5,34 C61,25.5 39,25.5 32.5,34 Z" fill="${c.hairColor}" ${S}/>`;
+      } else if (c.hairStyle === "curly") {
+        hairFront = `<path d="M31.5,31 Q26.5,17 39,13.5 Q43,5.5 53,8.5 Q63.5,6 65.5,16 Q72.5,20 68.5,31 Q50,22 31.5,31 Z" fill="${c.hairColor}" ${S}/>`;
+      }
+    }
+
+    const hat = c.hat === "none" ? "" : `
+      <path d="M31,28.5 C31,13 41,7.5 50,7.5 C59,7.5 69,13 69,28.5 Z" fill="${c.hat}" ${S}/>
+      <path d="M40,10.5 L40,25 M50,8.5 L50,25 M60,10.5 L60,25" fill="none" stroke="#1F1B16" stroke-width="1" opacity="0.35"/>
+      <rect x="29.5" y="24.5" width="41" height="8" rx="4" fill="${c.hat}" ${S}/>`;
+
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="${c.bg}"/>
+      ${hairBack}
+      <rect x="43.5" y="48" width="13" height="20" rx="5.5" fill="${c.skin}" ${S}/>
+      <path d="M17,102 L17,89 C17,77 30,70.5 50,70.5 C70,70.5 83,77 83,89 L83,102 Z" fill="${c.top}" ${S}/>
+      <path d="M38,74 L34,102 M62,74 L66,102" fill="none" stroke="#1F1B16" stroke-width="1" opacity="0.25"/>
+      <ellipse cx="50" cy="38" rx="17.5" ry="19.5" fill="${c.skin}" ${S}/>
+      <ellipse cx="43.5" cy="37.5" rx="2.1" ry="3" fill="#1F1B16"/>
+      <ellipse cx="56.5" cy="37.5" rx="2.1" ry="3" fill="#1F1B16"/>
+      <path d="M39.5,30.5 Q43.5,28.5 47,30.3 M53,30.3 Q56.5,28.5 60.5,30.5" fill="none" stroke="#1F1B16" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M50,40 Q48.4,42.6 50.4,43.4" fill="none" stroke="#1F1B16" stroke-width="1.3" stroke-linecap="round"/>
+      <path d="M44.5,47 Q50,49.5 55.5,47 Q53.5,53.5 50,53.5 Q46.5,53.5 44.5,47 Z" fill="#1F1B16"/>
+      <path d="M46.5,51.5 Q50,53.8 53.5,51.5 Q52,53.5 50,53.5 Q48,53.5 46.5,51.5 Z" fill="#F567C8"/>
+      ${hairFront}
+      ${hat}
+    </svg>`;
+  }
 
   // ---------- State ----------
 
@@ -15,7 +78,9 @@
   let selectedColor = COLORS[0];
   let view = "week";
   let profile = loadProfile();
-  let obAvatar = AVATARS[0];
+  let envies = loadEnvies();
+  let avatarCfg = { ...DEFAULT_AVATAR };
+  let pendingEnvieId = null;
 
   // ---------- Storage ----------
 
@@ -34,7 +99,9 @@
   function loadProfile() {
     try {
       const p = JSON.parse(localStorage.getItem(PROFILE_KEY));
-      return p && p.name ? p : null;
+      if (!p || !p.name) return null;
+      if (typeof p.avatar !== "object" || !p.avatar) p.avatar = { ...DEFAULT_AVATAR };
+      return p;
     } catch {
       return null;
     }
@@ -42,6 +109,18 @@
 
   function saveProfile() {
     localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+  }
+
+  function loadEnvies() {
+    try {
+      return JSON.parse(localStorage.getItem(ENVIES_KEY)) || [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveEnvies() {
+    localStorage.setItem(ENVIES_KEY, JSON.stringify(envies));
   }
 
   // ---------- Date utils ----------
@@ -103,15 +182,23 @@
   // ---------- Rendering ----------
 
   function render() {
-    $("weekView").hidden = view !== "week";
-    $("upcomingView").hidden = view !== "upcoming";
+    for (const v of ["week", "upcoming", "envies", "duo"]) {
+      $(v + "View").hidden = view !== v;
+    }
     $("navWeek").classList.toggle("active", view === "week");
     $("navUpcoming").classList.toggle("active", view === "upcoming");
+    $("navEnvies").classList.toggle("active", view === "envies");
+    $("navDuo").classList.toggle("active", view === "duo");
 
     if (view === "upcoming") {
       renderUpcoming();
       return;
     }
+    if (view === "envies") {
+      renderEnvies();
+      return;
+    }
+    if (view === "duo") return;
 
     renderGreeting();
 
@@ -186,7 +273,7 @@
     const hour = new Date().getHours();
     $("greetWord").textContent = (hour >= 18 || hour < 5 ? "Bonsoir, " : "Bonjour, ");
     $("greetName").textContent = profile.name;
-    $("avatarEmoji").textContent = profile.avatar;
+    $("avatarEmoji").innerHTML = avatarSVG(profile.avatar);
 
     const now = new Date();
     const todayKey = toKey(now);
@@ -209,42 +296,90 @@
 
   // ---------- Onboarding ----------
 
-  function renderAvatarGrid() {
-    const grid = $("avatarGrid");
-    grid.innerHTML = "";
-    for (const emoji of AVATARS) {
-      const btn = document.createElement("button");
-      btn.className = "avatar-opt";
-      btn.type = "button";
-      btn.textContent = emoji;
-      if (emoji === obAvatar) btn.classList.add("selected");
-      btn.addEventListener("click", () => {
-        obAvatar = emoji;
-        $("obPreview").textContent = emoji;
-        renderAvatarGrid();
-      });
-      grid.appendChild(btn);
+  const BUILDER_ROWS = [
+    { key: "skin", label: "Peau", colors: SKINS },
+    { key: "hairStyle", label: "Cheveux", chips: HAIR_STYLES },
+    { key: "hairColor", label: "Couleur des cheveux", colors: HAIR_COLORS },
+    { key: "hat", label: "Bonnet", colors: HAT_COLORS },
+    { key: "top", label: "Haut", colors: TOP_COLORS },
+    { key: "bg", label: "Fond", colors: BG_COLORS },
+  ];
+
+  function renderBuilder() {
+    $("obAvatar").innerHTML = avatarSVG(avatarCfg);
+    const root = $("builder");
+    root.innerHTML = "";
+    for (const row of BUILDER_ROWS) {
+      const label = document.createElement("p");
+      label.className = "builder-label";
+      label.textContent = row.label;
+      root.appendChild(label);
+
+      const wrap = document.createElement("div");
+      wrap.className = "builder-row";
+
+      if (row.colors) {
+        for (const color of row.colors) {
+          const dot = document.createElement("button");
+          dot.type = "button";
+          dot.className = "swatch";
+          if (color === "none") dot.classList.add("swatch-none");
+          else dot.style.background = color;
+          if (avatarCfg[row.key] === color) dot.classList.add("selected");
+          dot.addEventListener("click", () => {
+            avatarCfg[row.key] = color;
+            renderBuilder();
+          });
+          wrap.appendChild(dot);
+        }
+      } else {
+        for (const [value, text] of row.chips) {
+          const chip = document.createElement("button");
+          chip.type = "button";
+          chip.className = "chip";
+          chip.textContent = text;
+          if (avatarCfg[row.key] === value) chip.classList.add("selected");
+          chip.addEventListener("click", () => {
+            avatarCfg[row.key] = value;
+            renderBuilder();
+          });
+          wrap.appendChild(chip);
+        }
+      }
+      root.appendChild(wrap);
     }
   }
 
-  function openOnboard() {
-    obAvatar = profile ? profile.avatar : AVATARS[0];
+  function openOnboard(step) {
+    avatarCfg = profile ? { ...profile.avatar } : { ...DEFAULT_AVATAR };
     $("obName").value = profile ? profile.name : "";
-    $("obPreview").textContent = obAvatar;
+    $("obNext").textContent = profile ? "Continuer" : "Continuer";
     $("obDone").textContent = profile ? "Enregistrer" : "Commencer";
-    renderAvatarGrid();
+    $("obStep1").hidden = step === 2;
+    $("obStep2").hidden = step !== 2;
+    if (step === 2) renderBuilder();
     const ob = $("onboard");
     ob.hidden = false;
     ob.classList.remove("hide");
   }
 
-  $("obDone").addEventListener("click", () => {
+  $("obNext").addEventListener("click", () => {
     const name = $("obName").value.trim();
     if (!name) {
       $("obName").focus();
       return;
     }
-    profile = { name, avatar: obAvatar };
+    $("obStep1").hidden = true;
+    $("obStep2").hidden = false;
+    renderBuilder();
+  });
+
+  $("obName").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") $("obNext").click();
+  });
+
+  $("obDone").addEventListener("click", () => {
+    profile = { name: $("obName").value.trim(), avatar: { ...avatarCfg } };
     saveProfile();
     const ob = $("onboard");
     ob.classList.add("hide");
@@ -252,7 +387,137 @@
     render();
   });
 
-  $("profileBtn").addEventListener("click", openOnboard);
+  $("profileBtn").addEventListener("click", () => openOnboard(1));
+
+  // ---------- Envies ----------
+
+  function renderEnvies() {
+    const list = $("envieList");
+    list.innerHTML = "";
+
+    if (envies.length === 0) {
+      list.innerHTML = `
+        <div class="empty">
+          <div class="circle"></div>
+          <p>Aucune envie pour l'instant</p>
+        </div>`;
+      return;
+    }
+
+    envies.forEach((envie, i) => {
+      const card = document.createElement("div");
+      card.className = "plan-card envie-card";
+      card.style.setProperty("--plan-color", "#F8E9A1");
+      card.style.setProperty("--i", i);
+
+      const title = document.createElement("div");
+      title.className = "title";
+      title.textContent = envie.title;
+
+      const plan = document.createElement("button");
+      plan.type = "button";
+      plan.className = "envie-action";
+      plan.setAttribute("aria-label", "Planifier");
+      plan.innerHTML = '<svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 10h16M8.5 3.5v3.5M15.5 3.5v3.5M12 12.5v5M9.5 15h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+      plan.addEventListener("click", () => {
+        openSheet(null);
+        fTitle.value = envie.title;
+        pendingEnvieId = envie.id;
+      });
+
+      const del = document.createElement("button");
+      del.type = "button";
+      del.className = "envie-action danger";
+      del.setAttribute("aria-label", "Supprimer");
+      del.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+      del.addEventListener("click", () => {
+        envies = envies.filter((e) => e.id !== envie.id);
+        saveEnvies();
+        renderEnvies();
+      });
+
+      card.append(title, plan, del);
+      list.appendChild(card);
+    });
+  }
+
+  $("envieForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const title = $("envieInput").value.trim();
+    if (!title) return;
+    envies.push({ id: crypto.randomUUID(), title });
+    saveEnvies();
+    $("envieInput").value = "";
+    renderEnvies();
+  });
+
+  // ---------- Duo (partage / import) ----------
+
+  function encodeShare() {
+    const json = JSON.stringify({ p: plans, e: envies });
+    return "SEM1:" + btoa(unescape(encodeURIComponent(json)));
+  }
+
+  function setDuoStatus(msg) {
+    $("duoStatus").textContent = msg;
+    setTimeout(() => { $("duoStatus").textContent = ""; }, 5000);
+  }
+
+  $("shareBtn").addEventListener("click", async () => {
+    const code = encodeShare();
+    const text = `Mon planning · colle ce code dans l'app (À deux → Importer) :\n${code}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ text });
+        setDuoStatus("Partagé ✓");
+      } else {
+        await navigator.clipboard.writeText(text);
+        setDuoStatus("Copié dans le presse-papiers ✓");
+      }
+    } catch {
+      /* partage annulé */
+    }
+  });
+
+  $("importBtn").addEventListener("click", () => {
+    const raw = $("importInput").value;
+    const match = raw.match(/SEM1:[A-Za-z0-9+/=]+/);
+    if (!match) {
+      setDuoStatus("Code non reconnu");
+      return;
+    }
+    try {
+      const json = decodeURIComponent(escape(atob(match[0].slice(5))));
+      const data = JSON.parse(json);
+      const knownPlans = new Set(plans.map((p) => p.id));
+      const knownEnvies = new Set(envies.map((e) => e.id));
+      let added = 0;
+
+      for (const p of data.p || []) {
+        if (!p.id || !p.title || !p.date || !p.start) continue;
+        if (knownPlans.has(p.id)) {
+          const idx = plans.findIndex((x) => x.id === p.id);
+          plans[idx] = p;
+        } else {
+          plans.push(p);
+          added += 1;
+        }
+      }
+      for (const e of data.e || []) {
+        if (!e.id || !e.title) continue;
+        if (!knownEnvies.has(e.id)) {
+          envies.push(e);
+          added += 1;
+        }
+      }
+      save();
+      saveEnvies();
+      $("importInput").value = "";
+      setDuoStatus(added > 0 ? `Import réussi · ${added} nouveauté${added > 1 ? "s" : ""} ✓` : "Import réussi · déjà à jour ✓");
+    } catch {
+      setDuoStatus("Code non reconnu");
+    }
+  });
 
   function renderUpcoming() {
     const list = $("upcomingList");
@@ -310,6 +575,7 @@
 
   function openSheet(item) {
     editingId = item ? item.id : null;
+    pendingEnvieId = null;
     fTitle.value = item ? item.title : "";
     fStart.value = item ? item.start : "19:00";
     fEnd.value = item && item.end ? item.end : "";
@@ -359,6 +625,13 @@
     }
     save();
 
+    if (pendingEnvieId) {
+      envies = envies.filter((e) => e.id !== pendingEnvieId);
+      saveEnvies();
+      pendingEnvieId = null;
+      view = "week";
+    }
+
     selectedDate = data.date;
     weekStart = mondayOf(fromKey(data.date));
     closeSheet();
@@ -385,6 +658,16 @@
     render();
   });
 
+  $("navEnvies").addEventListener("click", () => {
+    view = "envies";
+    render();
+  });
+
+  $("navDuo").addEventListener("click", () => {
+    view = "duo";
+    render();
+  });
+
   $("prevWeek").addEventListener("click", () => shiftWeek(-7));
   $("nextWeek").addEventListener("click", () => shiftWeek(7));
 
@@ -407,5 +690,5 @@
   }
 
   render();
-  if (!profile) openOnboard();
+  if (!profile) openOnboard(1);
 })();

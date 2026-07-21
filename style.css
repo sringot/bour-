@@ -65,16 +65,16 @@ body {
   width: 50px;
   height: 50px;
   border: none;
+  padding: 0;
   border-radius: 50%;
   background: var(--bg);
   box-shadow: var(--out-soft);
-  font-size: 26px;
-  line-height: 1;
-  display: grid;
-  place-items: center;
+  overflow: hidden;
   cursor: pointer;
   transition: box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
 }
+
+.avatar-btn svg { display: block; width: 100%; height: 100%; }
 
 .avatar-btn:active {
   transform: scale(0.94);
@@ -118,6 +118,12 @@ body {
   animation: rise 0.5s var(--ease) backwards;
 }
 
+.onboard-preview svg {
+  width: 44px;
+  height: 44px;
+  color: var(--accent-warm);
+}
+
 .onboard-title {
   font-size: 24px;
   font-weight: 700;
@@ -143,33 +149,100 @@ body {
   animation: rise 0.5s var(--ease) 280ms backwards;
 }
 
-.avatar-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  padding: 6px 2px;
-  animation: rise 0.5s var(--ease) 220ms backwards;
+.ob-avatar {
+  width: 118px;
+  height: 118px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: var(--out);
+  animation: rise 0.5s var(--ease) backwards;
 }
 
-.avatar-opt {
-  aspect-ratio: 1;
-  border: none;
+.ob-avatar svg { display: block; width: 100%; height: 100%; }
+
+.builder {
+  text-align: left;
+  animation: rise 0.5s var(--ease) 160ms backwards;
+}
+
+.builder-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 14px 0 8px;
+}
+
+.builder-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.swatch {
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  opacity: 0.8;
+  transition: opacity 0.2s, transform 0.2s var(--ease);
+}
+
+.swatch.selected {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+.swatch.selected::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  box-shadow: var(--in);
+}
+
+.swatch.swatch-none {
+  background: var(--inset-bg);
+  box-shadow: var(--in);
+}
+
+.swatch.swatch-none::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: 50%;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--muted);
+  transform: rotate(-45deg);
+}
+
+.chip {
+  border: none;
+  border-radius: 12px;
   background: var(--bg);
   box-shadow: var(--out-soft);
-  font-size: 27px;
-  line-height: 1;
-  display: grid;
-  place-items: center;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 14px;
   cursor: pointer;
-  transition: box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
+  transition: box-shadow 0.2s var(--ease), color 0.2s, background 0.2s;
 }
 
-.avatar-opt:active { transform: scale(0.92); }
+.chip:active { transform: scale(0.96); }
 
-.avatar-opt.selected {
+.chip.selected {
   box-shadow: var(--in);
   background: var(--inset-bg);
+  color: var(--accent);
 }
 
 /* ---------- Header ---------- */
@@ -405,7 +478,7 @@ body {
   left: 50%;
   transform: translateX(-50%);
   bottom: calc(env(safe-area-inset-bottom) + 18px);
-  width: min(calc(100% - 44px), 300px);
+  width: min(calc(100% - 44px), 340px);
   height: 66px;
   border-radius: 24px;
   background: var(--bg);
@@ -638,6 +711,115 @@ label.field input:focus { outline: none; }
 }
 
 .btn-danger:active { box-shadow: var(--in); }
+
+/* ---------- Envies ---------- */
+
+.view-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin: -8px 0 18px;
+  line-height: 1.5;
+  animation: rise 0.4s var(--ease) backwards;
+}
+
+.envie-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  animation: rise 0.4s var(--ease) 60ms backwards;
+}
+
+.envie-form .field { flex: 1; margin-bottom: 0; }
+
+.envie-add {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 14px;
+  background: var(--bg);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: var(--out-soft);
+  transition: box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.envie-add svg { width: 20px; height: 20px; }
+
+.envie-add:active {
+  transform: scale(0.94);
+  box-shadow: var(--in);
+}
+
+.envie-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 14px;
+}
+
+.envie-card .title { flex: 1; margin: 0; }
+
+.envie-action {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: var(--out-soft);
+  transition: box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.envie-action svg { width: 17px; height: 17px; }
+
+.envie-action:active {
+  transform: scale(0.92);
+  box-shadow: var(--in);
+}
+
+.envie-action.danger { color: var(--accent-warm); }
+
+/* ---------- Duo ---------- */
+
+.duo-btn {
+  width: 100%;
+  margin-bottom: 8px;
+  animation: rise 0.4s var(--ease) 60ms backwards;
+}
+
+.btn-secondary {
+  background: var(--bg);
+  color: var(--accent);
+  box-shadow: var(--out-soft);
+}
+
+.btn-secondary:active { box-shadow: var(--in); }
+
+.duo-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 22px 0 10px;
+  animation: rise 0.4s var(--ease) 100ms backwards;
+}
+
+.duo-status {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  text-align: center;
+  margin-top: 14px;
+  min-height: 18px;
+}
 
 /* ---------- Motion ---------- */
 
