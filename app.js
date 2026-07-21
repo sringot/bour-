@@ -29,6 +29,15 @@
     return `<span class="avatar-img" style="background:${av.bg}"><img src="assets/${av.id}.png" alt=""></span>`;
   }
 
+  // Ne reconstruit l'image que si l'avatar a réellement changé (évite le clignotement).
+  function setAvatar(el, a) {
+    const av = normAvatar(a);
+    const sig = `${av.id}|${av.bg}`;
+    if (el.dataset.sig === sig) return;
+    el.dataset.sig = sig;
+    el.innerHTML = avatarHTML(av);
+  }
+
 
   // ---------- State ----------
 
@@ -162,11 +171,14 @@
 
   // ---------- Rendering ----------
 
+  let viewEntering = false;
+
   function render() {
     for (const v of ["week", "upcoming", "envies", "profile"]) {
       $(v + "View").hidden = view !== v;
     }
-    if (render.lastView !== view) {
+    viewEntering = render.lastView !== view;
+    if (viewEntering) {
       const el = $(view + "View");
       el.classList.remove("view-enter");
       void el.offsetWidth;
@@ -292,7 +304,7 @@
     const hour = new Date().getHours();
     $("greetWord").textContent = (hour >= 18 || hour < 5 ? "Bonsoir, " : "Bonjour, ");
     $("greetName").textContent = profile.name;
-    $("avatarEmoji").innerHTML = avatarHTML(profile.avatar);
+    setAvatar($("avatarEmoji"), profile.avatar);
 
     const now = new Date();
     const todayKey = toKey(now);
@@ -418,7 +430,7 @@
 
   function renderProfile() {
     if (!profile) return;
-    $("profileAvatar").innerHTML = avatarHTML(profile.avatar);
+    setAvatar($("profileAvatar"), profile.avatar);
     $("profileName").textContent = profile.name;
 
     const todayKey = toKey(new Date());
@@ -432,6 +444,7 @@
     const grid = $("statsGrid");
     grid.innerHTML = "";
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const animate = viewEntering && !reduceMotion;
     stats.forEach(([n, label], i) => {
       const el = document.createElement("div");
       el.className = "stat-card";
@@ -439,10 +452,10 @@
       el.innerHTML = '<div class="num"></div><div class="lbl"></div>';
       el.querySelector(".lbl").textContent = label;
       const numEl = el.querySelector(".num");
-      if (reduceMotion || n === 0) {
-        numEl.textContent = n;
-      } else {
+      if (animate && n > 0) {
         animateNum(numEl, n, 160 + i * 40);
+      } else {
+        numEl.textContent = n;
       }
       grid.appendChild(el);
     });

@@ -67,7 +67,7 @@ button {
 .app {
   max-width: 480px;
   margin: 0 auto;
-  padding: calc(env(safe-area-inset-top) + 16px) 20px calc(env(safe-area-inset-bottom) + 104px);
+  padding: calc(env(safe-area-inset-top) + 34px) 24px calc(env(safe-area-inset-bottom) + 108px);
 }
 
 /* ---------- Compact top bar ---------- */
@@ -345,8 +345,8 @@ button {
   font: inherit;
   color: inherit;
   transition: transform 0.3s var(--spring), opacity 0.15s;
-  animation: cardIn 0.4s var(--spring) backwards;
-  animation-delay: calc(var(--i, 0) * 40ms);
+  animation: cardIn 0.32s var(--ease-out) backwards;
+  animation-delay: calc(min(var(--i, 0), 6) * 28ms);
 }
 
 .plan-card:active {
