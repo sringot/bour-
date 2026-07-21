@@ -308,26 +308,30 @@
 
     const now = new Date();
     const todayKey = toKey(now);
-    const hm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-    const next = livePlans()
-      .filter((p) => p.date > todayKey || (p.date === todayKey && p.start >= hm))
+    const lp = livePlans();
+    const todayCount = lp.filter((p) => p.date === todayKey).length;
+    const next = lp
+      .filter((p) => p.date > todayKey)
       .sort((a, b) => a.date.localeCompare(b.date) || a.start.localeCompare(b.start))[0];
 
-    if (!next) {
-      $("greetSub").textContent = "Rien de prévu pour l'instant";
+    const sub = $("greetSub");
+    sub.textContent = "";
+
+    if (todayCount > 0) {
+      // Un rappel clair sans répéter l'événement affiché juste en dessous.
+      sub.textContent = todayCount > 1 ? `${todayCount} plans aujourd'hui` : "1 plan aujourd'hui";
       return;
     }
-    const days = Math.round((fromKey(next.date) - fromKey(todayKey)) / 86400000);
-    const when =
-      days === 0 ? `aujourd'hui à ${next.start}` :
-      days === 1 ? `demain à ${next.start}` :
-      `dans ${days} jours`;
-    const sub = $("greetSub");
-    sub.textContent = `${next.title} · `;
-    const chip = document.createElement("span");
-    chip.className = "countdown";
-    chip.textContent = when;
-    sub.appendChild(chip);
+    if (next) {
+      const days = Math.round((fromKey(next.date) - fromKey(todayKey)) / 86400000);
+      sub.append("Prochain plan ");
+      const chip = document.createElement("span");
+      chip.className = "countdown";
+      chip.textContent = days === 1 ? "demain" : `dans ${days} jours`;
+      sub.appendChild(chip);
+      return;
+    }
+    sub.textContent = "Rien de prévu pour l'instant";
   }
 
   // ---------- Onboarding ----------

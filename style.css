@@ -499,9 +499,9 @@ button {
   z-index: 9;
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 6px;
-  border-radius: 999px;
+  gap: 0;
+  padding: 6px 8px;
+  border-radius: 26px;
   background: var(--bar);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   backdrop-filter: blur(20px) saturate(180%);
@@ -509,56 +509,54 @@ button {
 }
 
 .nav-btn {
-  height: 44px;
-  min-width: 44px;
-  padding: 0 12px;
+  width: 58px;
+  height: 46px;
   border: none;
-  border-radius: 999px;
+  border-radius: 15px;
   background: none;
   color: var(--tertiary);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 3px;
   cursor: pointer;
-  transition: background 0.3s var(--ease-out), color 0.2s, transform 0.25s var(--spring);
+  transition: color 0.25s var(--ease-out), background 0.25s var(--ease-out), transform 0.2s var(--spring);
 }
 
 .nav-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 21px;
+  height: 21px;
   flex-shrink: 0;
 }
 
 .nav-btn .nav-label {
-  font-size: 12.5px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: -0.01em;
-  max-width: 0;
-  opacity: 0;
-  overflow: hidden;
+  letter-spacing: -0.005em;
   white-space: nowrap;
-  transition: max-width 0.35s var(--ease-out), opacity 0.25s;
 }
 
 .nav-btn.active {
-  background: var(--primary);
-  color: var(--on-primary);
+  color: var(--ink);
+  background: var(--fill);
 }
 
-.nav-btn.active svg { animation: pop 0.4s var(--spring); }
+.nav-btn.active svg { animation: navPop 0.4s var(--spring); }
 
-.nav-btn.active .nav-label {
-  max-width: 72px;
-  opacity: 1;
+@keyframes navPop {
+  0% { transform: translateY(0) scale(1); }
+  45% { transform: translateY(-2px) scale(1.12); }
+  100% { transform: translateY(0) scale(1); }
 }
 
-.nav-btn:not(.active):active { transform: scale(0.9); }
+.nav-btn:active { transform: scale(0.9); }
 
 .nav-add {
-  width: 44px;
-  height: 44px;
+  width: 50px;
+  height: 50px;
   flex-shrink: 0;
+  margin: 0 4px;
   border: none;
   border-radius: 50%;
   background: var(--accent);
@@ -566,7 +564,7 @@ button {
   display: grid;
   place-items: center;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(126, 140, 90, 0.35), 0 6px 16px rgba(126, 140, 90, 0.25);
+  box-shadow: 0 2px 8px rgba(126, 140, 90, 0.4), 0 8px 20px rgba(126, 140, 90, 0.28);
   transition: transform 0.25s var(--spring), box-shadow 0.2s, opacity 0.15s;
 }
 
