@@ -4,10 +4,14 @@ Petit planning hebdomadaire, minimaliste et sans compte. Une page web statique p
 
 ## Fonctionnalités
 
-- Vue semaine (lundi → dimanche), navigation entre les semaines
-- Ajout / édition / suppression de créneaux (titre, heures, note, couleur)
-- Points sous les jours qui contiennent quelque chose
-- Données stockées en local sur le téléphone (localStorage), aucun serveur
+- Vue semaine (lundi → dimanche), swipe entre les semaines, vue "À venir" groupée par jour
+- Ajout / édition / suppression de créneaux (titre, heures, note, couleur) avec mini-avatar du créateur
+- Liste d'envies sans date, transformables en plan daté
+- Onboarding : prénom + créateur d'avatar personnalisable (SVG)
+- Synchronisation automatique entre deux téléphones via un lien d'invitation
+- Notifications quand l'autre ajoute quelque chose
+- Design type iOS : mode clair/sombre automatique, barres en verre dépoli, animations spring
+- Données stockées en local (localStorage), synchro via un espace JSON partagé
 - PWA : installable sur l'écran d'accueil, fonctionne hors-ligne
 
 ## Mise en ligne (GitHub Pages)

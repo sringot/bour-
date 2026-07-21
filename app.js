@@ -206,6 +206,15 @@
     for (const v of ["week", "upcoming", "envies"]) {
       $(v + "View").hidden = view !== v;
     }
+    if (render.lastView !== view) {
+      const el = $(view + "View");
+      el.classList.remove("view-enter");
+      void el.offsetWidth;
+      el.classList.add("view-enter");
+      render.lastView = view;
+      window.scrollTo({ top: 0 });
+    }
+    if (view !== "week") $("topBar").textContent = view === "envies" ? "Envies" : "À venir";
     $("navWeek").classList.toggle("active", view === "week");
     $("navUpcoming").classList.toggle("active", view === "upcoming");
     $("navEnvies").classList.toggle("active", view === "envies");
@@ -225,6 +234,7 @@
     const todayKey = toKey(new Date());
 
     monthLabel.textContent = fmtMonth.format(days[3]);
+    $("topBar").textContent = monthLabel.textContent;
     todayBtn.hidden = mondayOf(new Date()).getTime() === weekStart.getTime();
 
     weekStrip.innerHTML = "";
@@ -270,6 +280,15 @@
     items.forEach((item, i) => planList.appendChild(makeCard(item, i)));
   }
 
+  function miniAvatar(by) {
+    if (!by || !by.a) return null;
+    const el = document.createElement("span");
+    el.className = "mini-avatar";
+    el.title = by.n || "";
+    el.innerHTML = avatarSVG(by.a);
+    return el;
+  }
+
   function makeCard(item, i) {
     const card = document.createElement("button");
     card.className = "plan-card";
@@ -278,11 +297,13 @@
     card.style.setProperty("--i", i);
     const time = item.end ? `${item.start} – ${item.end}` : item.start;
     card.innerHTML = `
-      <div class="time">${time}</div>
+      <div class="meta"><span class="cdot"></span><span class="time">${time}</span></div>
       <div class="title"></div>
       ${item.note ? '<div class="note"></div>' : ""}`;
     card.querySelector(".title").textContent = item.title;
     if (item.note) card.querySelector(".note").textContent = item.note;
+    const avatar = miniAvatar(item.by);
+    if (avatar) card.appendChild(avatar);
     card.addEventListener("click", () => openSheet(item));
     return card;
   }
@@ -305,12 +326,17 @@
       $("greetSub").textContent = "Rien de prévu pour l'instant";
       return;
     }
-    const tomorrowKey = toKey(addDays(now, 1));
+    const days = Math.round((fromKey(next.date) - fromKey(todayKey)) / 86400000);
     const when =
-      next.date === todayKey ? "aujourd'hui" :
-      next.date === tomorrowKey ? "demain" :
-      fmtGroup.format(fromKey(next.date));
-    $("greetSub").textContent = `Prochain plan : ${next.title} · ${when} à ${next.start}`;
+      days === 0 ? `aujourd'hui à ${next.start}` :
+      days === 1 ? `demain à ${next.start}` :
+      `dans ${days} jours`;
+    const sub = $("greetSub");
+    sub.textContent = `${next.title} · `;
+    const chip = document.createElement("span");
+    chip.className = "countdown";
+    chip.textContent = when;
+    sub.appendChild(chip);
   }
 
   // ---------- Onboarding ----------
@@ -377,6 +403,7 @@
     $("obStep1").hidden = step === 2;
     $("obStep2").hidden = step !== 2;
     $("obInvite").hidden = !profile;
+    if (profile) refreshNotifBtn();
     if (step === 2) renderBuilder();
     const ob = $("onboard");
     ob.hidden = false;
@@ -409,6 +436,29 @@
 
   $("profileBtn").addEventListener("click", () => openOnboard(1));
 
+  function refreshNotifBtn() {
+    const btn = $("notifBtn");
+    if (!("Notification" in window)) {
+      btn.textContent = "Notifications non disponibles ici";
+      btn.disabled = true;
+      return;
+    }
+    if (Notification.permission === "granted") btn.textContent = "Notifications activées ✓";
+    else if (Notification.permission === "denied") btn.textContent = "Notifications refusées (voir Réglages)";
+    else btn.textContent = "Activer les notifications";
+  }
+
+  $("notifBtn").addEventListener("click", async () => {
+    if (!("Notification" in window) || Notification.permission !== "default") return;
+    try {
+      const perm = await Notification.requestPermission();
+      if (perm === "granted") toast("Notifications activées ✓");
+    } catch {
+      /* refus */
+    }
+    refreshNotifBtn();
+  });
+
   // ---------- Envies ----------
 
   function renderEnvies() {
@@ -434,6 +484,7 @@
       const title = document.createElement("div");
       title.className = "title";
       title.textContent = envie.title;
+      const avatar = miniAvatar(envie.by);
 
       const plan = document.createElement("button");
       plan.type = "button";
@@ -458,7 +509,9 @@
         renderEnvies();
       });
 
-      card.append(title, plan, del);
+      card.append(title);
+      if (avatar) card.append(avatar);
+      card.append(plan, del);
       list.appendChild(card);
     });
   }
@@ -467,7 +520,12 @@
     e.preventDefault();
     const title = $("envieInput").value.trim();
     if (!title) return;
-    envies.push({ id: crypto.randomUUID(), title, u: Date.now() });
+    envies.push({
+      id: crypto.randomUUID(),
+      title,
+      u: Date.now(),
+      by: profile ? { n: profile.name, a: profile.avatar } : null,
+    });
     saveEnvies();
     $("envieInput").value = "";
     renderEnvies();
@@ -505,18 +563,36 @@
   function mergeLists(local, incoming) {
     const map = new Map(local.map((it) => [it.id, it]));
     let changed = false;
+    const fresh = [];
     for (const it of incoming || []) {
       if (!it || !it.id) continue;
       const cur = map.get(it.id);
       if (!cur) {
         map.set(it.id, it);
         changed = true;
+        if (!it.del) fresh.push(it);
       } else if ((it.u || 0) > (cur.u || 0)) {
         map.set(it.id, it);
         changed = true;
       }
     }
-    return [Array.from(map.values()), changed];
+    return [Array.from(map.values()), changed, fresh];
+  }
+
+  function notifyFresh(fresh) {
+    const fromPartner = fresh.filter((it) => it.by && it.by.n && (!profile || it.by.n !== profile.name));
+    if (fromPartner.length === 0) return;
+    const first = fromPartner[0];
+    const msg = fromPartner.length === 1
+      ? `${first.by.n} a ajouté : ${first.title}`
+      : `${first.by.n} a ajouté ${fromPartner.length} nouveautés`;
+    if ("Notification" in window && Notification.permission === "granted" && document.visibilityState === "hidden") {
+      navigator.serviceWorker.ready
+        .then((reg) => reg.showNotification("Semaine", { body: msg, icon: "icons/icon-192.png", badge: "icons/icon-192.png" }))
+        .catch(() => {});
+    } else {
+      toast(msg);
+    }
   }
 
   let syncing = false;
@@ -527,12 +603,14 @@
     try {
       const res = await fetch(`${API_BASE}/${syncSpace.id}`, { cache: "no-store" });
       let changed = false;
+      let fresh = [];
       if (res.ok) {
         const remote = await res.json();
-        let c1, c2;
-        [plans, c1] = mergeLists(plans, remote.p);
-        [envies, c2] = mergeLists(envies, remote.e);
+        let c1, c2, f1, f2;
+        [plans, c1, f1] = mergeLists(plans, remote.p);
+        [envies, c2, f2] = mergeLists(envies, remote.e);
         changed = c1 || c2;
+        fresh = [...f1, ...f2];
       }
       await fetch(`${API_BASE}/${syncSpace.id}`, {
         method: "PUT",
@@ -543,6 +621,7 @@
       if (changed) {
         persist();
         render();
+        notifyFresh(fresh);
       }
     } catch {
       /* hors ligne : nouvelle tentative au prochain déclencheur */
@@ -622,6 +701,46 @@
       toast("Connexion impossible · réouvre le lien d'invitation");
     }
   }
+
+  // ---------- Gestes & détails ----------
+
+  window.addEventListener("scroll", () => {
+    $("topBar").classList.toggle("visible", window.scrollY > 64);
+  }, { passive: true });
+
+  let swipeX = null;
+  let swipeY = null;
+  weekStrip.addEventListener("touchstart", (e) => {
+    swipeX = e.touches[0].clientX;
+    swipeY = e.touches[0].clientY;
+  }, { passive: true });
+  weekStrip.addEventListener("touchend", (e) => {
+    if (swipeX === null) return;
+    const dx = e.changedTouches[0].clientX - swipeX;
+    const dy = e.changedTouches[0].clientY - swipeY;
+    swipeX = null;
+    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 2) shiftWeek(dx < 0 ? 7 : -7);
+  }, { passive: true });
+
+  let dragY = null;
+  sheet.addEventListener("touchstart", (e) => {
+    if (e.target.closest("input, button, .color-row")) return;
+    dragY = e.touches[0].clientY;
+    sheet.classList.add("dragging");
+  }, { passive: true });
+  sheet.addEventListener("touchmove", (e) => {
+    if (dragY === null) return;
+    const dy = Math.max(0, e.touches[0].clientY - dragY);
+    sheet.style.transform = `translateY(${dy}px)`;
+  }, { passive: true });
+  sheet.addEventListener("touchend", (e) => {
+    if (dragY === null) return;
+    const dy = Math.max(0, e.changedTouches[0].clientY - dragY);
+    dragY = null;
+    sheet.classList.remove("dragging");
+    sheet.style.transform = "";
+    if (dy > 110) closeSheet();
+  });
 
   setInterval(() => {
     if (syncSpace && document.visibilityState === "visible") syncNow();
@@ -734,7 +853,8 @@
       const idx = plans.findIndex((p) => p.id === editingId);
       if (idx !== -1) plans[idx] = { ...plans[idx], ...data };
     } else {
-      plans.push({ id: crypto.randomUUID(), ...data });
+      const by = profile ? { n: profile.name, a: profile.avatar } : null;
+      plans.push({ id: crypto.randomUUID(), ...data, by });
     }
     save();
 
