@@ -1,41 +1,16 @@
 // ============================================================
-//  Configuration Firebase (synchronisation temps réel)
+//  Configuration Firebase — synchronisation temps réel
 // ============================================================
-//
-//  Tant que ce fichier est vide, l'app utilise la synchro simple
-//  par lien (sans compte). Pour activer la vraie synchro temps réel :
-//
-//  1. Va sur https://console.firebase.google.com → "Ajouter un projet"
-//     (nom au choix, ex. "semaine"). Tu peux désactiver Google Analytics.
-//  2. Dans le projet : menu de gauche → "Firestore Database" →
-//     "Créer une base de données" → mode "production" → région "europe-west".
-//  3. Onglet "Règles" de Firestore, remplace tout par :
-//
-//        rules_version = '2';
-//        service cloud.firestore {
-//          match /databases/{database}/documents {
-//            match /spaces/{spaceId} {
-//              allow read, write: if true;
-//            }
-//          }
-//        }
-//
-//     puis "Publier".
-//  4. Roue crantée (Paramètres du projet) → onglet "Général" →
-//     section "Vos applications" → icône Web "</>" → donne un surnom →
-//     "Enregistrer l'application". Firebase affiche un objet
-//     "const firebaseConfig = { ... }".
-//  5. Recopie les valeurs de cet objet ci-dessous, puis enregistre.
-//
-//  (Le spaceId fait office de clé privée entre vous deux : ne partagez
-//   le lien d'invitation qu'entre vos deux téléphones.)
+//  Ces valeurs Web sont publiques par conception (côté client).
+//  La sécurité repose sur le spaceId du lien d'invitation :
+//  ne partagez ce lien qu'entre vos deux téléphones.
 // ============================================================
 
 window.FIREBASE_CONFIG = {
-  // apiKey: "...",
-  // authDomain: "...",
-  // projectId: "...",
-  // storageBucket: "...",
-  // messagingSenderId: "...",
-  // appId: "...",
+  apiKey: "AIzaSyDtqIZJgG4A1VPwivXnht7gPj6_QuWhrDM",
+  authDomain: "week-e1c61.firebaseapp.com",
+  projectId: "week-e1c61",
+  storageBucket: "week-e1c61.firebasestorage.app",
+  messagingSenderId: "190684765997",
+  appId: "1:190684765997:web:776231aeaa3ed05dfc7da4",
 };
