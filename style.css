@@ -478,8 +478,8 @@ button {
 .timeline::before {
   content: "";
   position: absolute;
-  left: 51px;
-  top: 14px;
+  left: 52px;
+  top: 16px;
   bottom: 14px;
   width: 2px;
   border-radius: 1px;
@@ -488,7 +488,7 @@ button {
 
 .tl-row {
   position: relative;
-  padding-left: 70px;
+  padding-left: 72px;
   margin-bottom: 8px;
   animation: cardIn 0.32s var(--ease-out) backwards;
   animation-delay: calc(min(var(--i, 0), 6) * 28ms);
@@ -497,8 +497,8 @@ button {
 .tl-time {
   position: absolute;
   left: 0;
-  top: 13px;
-  width: 44px;
+  top: 14px;
+  width: 40px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -506,15 +506,15 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
-.tl-time .t0 { font-size: 12px; font-weight: 600; color: var(--ink); }
-.tl-time .t1 { font-size: 10px; font-weight: 500; color: var(--tertiary); }
+.tl-time .t0 { font-size: 12px; font-weight: 600; color: var(--ink); line-height: 1.15; }
+.tl-time .t1 { font-size: 10px; font-weight: 500; color: var(--tertiary); line-height: 1.15; }
 
 .tl-dot {
   position: absolute;
-  left: 46px;
-  top: 17px;
-  width: 12px;
-  height: 12px;
+  left: 47px;
+  top: 15px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   background: var(--plan-color, var(--accent));
   box-shadow: 0 0 0 4px var(--bg);
